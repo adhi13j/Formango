@@ -31,7 +31,7 @@ Sizes replace the old hour estimates, which were unrealistic (Moveable snapping 
   - **Do:** in `tsconfig`, enable `strict`, `noUncheckedIndexedAccess`, `noImplicitOverride`. Add path alias `@/*` to `src/*` in both tsconfig and `vite.config.ts`.
   - **Done when:** `import x from '@/lib/x'` works and `npm run typecheck` (`tsc --noEmit`) passes.
 
-- [ ] **0.3 Tooling and scripts**
+- [x] **0.3 Tooling and scripts**
   - **Do:** install ESLint (typescript-eslint, react-hooks plugin), Prettier. Add scripts: `dev`, `build`, `preview`, `lint`, `typecheck`, `test`, `check:contrast`, `check:fast` (lint, typecheck, test), `check` (check:fast, check:contrast, build, and Playwright once task 0.7 adds it). Add `.github/workflows/ci.yml` running `npm ci` and `npm run check` on push (free for public repos).
   - **Details:** Prettier: single quotes, semicolons, 100 columns, trailing commas. Lint must fail on unused vars and on `any` (use `unknown` and narrow).
   - **Done when:** `npm run check` passes on the empty project.
