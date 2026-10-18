@@ -142,7 +142,7 @@ function ChoiceList({ el, interactive, value, describedBy, onChange }: InputProp
     <div
       role={kind === 'radio' ? 'radiogroup' : 'group'}
       aria-labelledby={`lbl-${el.id}`}
-      aria-required={el.required || undefined}
+      aria-required={kind === 'radio' && el.required ? true : undefined}
       aria-describedby={describedBy}
       style={{
         ...fill,

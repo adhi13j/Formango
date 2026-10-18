@@ -304,7 +304,8 @@ export function Canvas() {
     <div
       ref={workspaceRef}
       data-testid="workspace"
-      tabIndex={-1}
+      tabIndex={0}
+      aria-label="Design canvas"
       className="relative h-full w-full overflow-auto outline-none"
       style={{ cursor, background: page.outerBackground }}
       onPointerDown={onPointerDown}

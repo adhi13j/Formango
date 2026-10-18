@@ -8,6 +8,9 @@ const C = {
   berry: '#CF3340', teal: '#1F8A8A', sky: '#3B82C4', violet: '#6D5BD0', leaf: '#4C9A2A',
 };
 
+// White text on the palette teal is 4.1:1, short of the 4.5:1 that small text needs.
+const DEEP_TEAL = '#177373';
+
 const base = (id, name, x, y, width, height) => ({ id, name, x, y, width, height, locked: false, hidden: false });
 
 const rect = (id, name, x, y, w, h, o = {}) => ({
@@ -132,7 +135,7 @@ const wedding = doc('Wedding RSVP', mobile({ background: '#FFFBF3', outer: '#EFE
 ]);
 
 const support = doc('Support request', mobile({ outer: '#D5ECEC' }), [
-  rect('s-band', 'Header', 0, 0, 390, 150, { fill: C.teal }),
+  rect('s-band', 'Header', 0, 0, 390, 150, { fill: DEEP_TEAL }),
   circle('s-dot', 'Decoration', 296, 22, 72, { fill: C.white, opacity: 0.2 }),
   text('s-title', 'Title', 'Support request', 20, 48, 300, { role: 'heading', font: 'space-grotesk', size: 30, weight: 700, color: C.white }),
   text('s-sub', 'Subtitle', 'Tell us what went wrong. We answer within one working day.', 20, 96, 320, { color: C.white, size: 15 }),
@@ -213,7 +216,7 @@ const proposal = (() => {
   };
 
   y = 0;
-  els.push(rect('p-band', 'Header band', 0, 0, 390, 196, { fill: C.teal }));
+  els.push(rect('p-band', 'Header band', 0, 0, 390, 196, { fill: DEEP_TEAL }));
   els.push(circle('p-dot', 'Decoration', 300, 24, 70, { fill: C.white, opacity: 0.18 }));
   els.push(text('p-title', 'Title', 'Insurance proposal: information sheet', L, 40, 300, { role: 'heading', font: 'space-grotesk', size: 26, weight: 700, color: C.white, lh: 1.2 }));
   els.push(text('p-sub', 'Subtitle', 'Give these details to your Development Officer. They will enter them on the ANANDA proposal screens. Nothing here is submitted to an insurer.', L, 118, 340, { size: 14, color: C.white }));

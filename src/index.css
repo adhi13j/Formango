@@ -70,3 +70,36 @@ body {
 .fm-moveable .moveable-line {
   background: var(--selection);
 }
+
+/* Landing page: preset cards drift upward in a seamless loop (the list is drawn twice). */
+@keyframes preset-scroll {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-50%);
+  }
+}
+
+.preset-track {
+  animation: preset-scroll 70s linear infinite;
+}
+
+.preset-track.is-slow {
+  animation-duration: 95s;
+}
+
+.preset-track.is-reverse {
+  animation-direction: reverse;
+}
+
+.preset-panel:hover .preset-track,
+.preset-panel:focus-within .preset-track {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .preset-track {
+    animation: none;
+  }
+}

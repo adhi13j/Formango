@@ -1,5 +1,6 @@
 import { Plus } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router';
 import { toast, Toaster } from 'sonner';
 import { AppHeader } from '@/components/common/AppHeader';
 import { Button } from '@/components/ui/button';
@@ -11,6 +12,7 @@ import { GuestHandoff } from '@/features/forms/GuestHandoff';
 import { NewFormDialog } from '@/features/forms/NewFormDialog';
 import { loadAllFonts } from '@/lib/fonts';
 import { createFormsRepo, type FormSummary } from '@/lib/repo/formsRepo';
+import { TEMPLATES } from '@/templates';
 import { usePageMeta } from '@/lib/usePageMeta';
 
 const UNDO_MS = 5000;
@@ -26,6 +28,9 @@ export default function Forms() {
   const [newOpen, setNewOpen] = useState(false);
   const [toDelete, setToDelete] = useState<FormSummary | null>(null);
   const timers = useRef(new Map<string, ReturnType<typeof setTimeout>>());
+  const [params] = useSearchParams();
+  const navigate = useNavigate();
+  const templateId = params.get('template');
 
   const refresh = useCallback(async () => {
     const repo = createFormsRepo();
@@ -48,6 +53,23 @@ export default function Forms() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void refresh();
   }, [refresh]);
+
+  // "Use this template" on the landing page comes back here after login.
+  useEffect(() => {
+    const template = TEMPLATES.find((t) => t.id === templateId);
+    if (!template) return;
+    let cancelled = false;
+    void createFormsRepo()
+      .create(structuredClone(template.doc))
+      .then((result) => {
+        if (cancelled) return;
+        if (result.ok) navigate(`/forms/${result.value.id}/edit`, { replace: true });
+        else toast.error(result.error.message);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [templateId, navigate]);
 
   // A delete still waiting for its undo window finishes if the page is left.
   useEffect(() => {

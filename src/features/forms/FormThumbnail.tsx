@@ -15,6 +15,7 @@ export function FormThumbnail({ doc, width, height }: FormThumbnailProps) {
   return (
     <div
       aria-hidden="true"
+      inert
       className="relative overflow-hidden"
       style={{
         width,

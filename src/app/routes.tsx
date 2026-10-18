@@ -1,12 +1,22 @@
 import { createBrowserRouter, type RouteObject } from 'react-router';
-import Landing from '@/pages/Landing';
 import NotFound from '@/pages/NotFound';
 import { RequireAuth } from '@/features/auth/RequireAuth';
 import { RouteError } from './RouteError';
 import { RouteLoading } from './RouteLoading';
 
 const routes: RouteObject[] = [
-  { path: '/', element: <Landing />, errorElement: <RouteError /> },
+  {
+    path: '/',
+    lazy: async () => ({ Component: (await import('@/pages/Landing')).default }),
+    errorElement: <RouteError />,
+    hydrateFallbackElement: <RouteLoading />,
+  },
+  {
+    path: '/privacy',
+    lazy: async () => ({ Component: (await import('@/pages/Privacy')).default }),
+    errorElement: <RouteError />,
+    hydrateFallbackElement: <RouteLoading />,
+  },
   // Lazy: the builder (and later Moveable) stays out of the fill page bundle.
   {
     path: '/builder',

@@ -20,6 +20,7 @@ export function LoginCard({ redirectTo }: { redirectTo: string | null }) {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [checkEmail, setCheckEmail] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const signingUp = mode === 'signUp';
 
   const submit = async (event: React.FormEvent) => {
@@ -59,7 +60,7 @@ export function LoginCard({ redirectTo }: { redirectTo: string | null }) {
       noValidate
       className="w-full max-w-sm space-y-4 rounded-xl border border-border bg-card p-6 shadow-sm"
     >
-      <h1 className="m-0 text-xl font-bold text-foreground">
+      <h1 className="m-0 mb-2 text-xl font-bold text-foreground">
         {signingUp ? 'Create your account' : 'Welcome back'}
       </h1>
       {!configured && (
@@ -83,13 +84,22 @@ export function LoginCard({ redirectTo }: { redirectTo: string | null }) {
         <Label htmlFor="login-password">Password</Label>
         <Input
           id="login-password"
-          type="password"
+          type={showPassword ? 'text' : 'password'}
           autoComplete={signingUp ? 'new-password' : 'current-password'}
           value={password}
           onChange={(event) => setPassword(event.target.value)}
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? 'login-error' : undefined}
         />
+        <label className="flex items-center gap-2 text-xs text-muted-foreground">
+          <input
+            type="checkbox"
+            className="size-4 accent-primary"
+            checked={showPassword}
+            onChange={(event) => setShowPassword(event.target.checked)}
+          />
+          Show password
+        </label>
         {signingUp && <p className="m-0 text-xs text-muted-foreground">At least 8 characters.</p>}
       </div>
       {error && (
