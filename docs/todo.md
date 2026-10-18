@@ -80,7 +80,7 @@ Goal: by the end, the owner can open `/builder`, design a form, undo and redo, p
 
 **Task splitting:** 1.9 (static renderers first, then interactive fields), 1.11 (move and resize, then snapping, then per-type resize rules and multi-select) and 1.14 (toolbar scaffold and color popover, then options editor, then the rest) are each too big for one session. Split them and tick the parts.
 
-- [ ] **1.1 Types and schema**
+- [x] **1.1 Types and schema**
   - **Do:** create `src/types/doc.ts` exactly as in `docs/schema.md` (note: no `id` and no `recentColors` on `FormDoc`; `page.submit` and `TextElement.role` exist). Create `src/types/doc.schema.ts` (Zod) mirroring it, plus `migrate()` and `createBlankDoc(preset)`.
   - **Details:** constants in `src/lib/constants.ts`: page presets, element defaults table, min sizes (width 80, text min width 40, field min height per `schema.md`), max elements 150, snap threshold 6, zoom range 0.25 to 3, default palette from `theme.md`.
   - **Done when:** unit tests: blank doc validates, a doc with an unknown element type fails, `migrate` returns a valid doc for version 1.
