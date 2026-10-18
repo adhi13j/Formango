@@ -62,7 +62,7 @@ If documents disagree, this priority wins: `schema.md` (data), then `layout.md` 
 
 ```
 VITE_SUPABASE_URL=
-VITE_SUPABASE_ANON_KEY=
+VITE_SUPABASE_PUBLISHABLE_KEY=
 ```
 
 Phases 0 to 2 need no env vars.

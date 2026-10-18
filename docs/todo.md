@@ -24,7 +24,7 @@ Sizes replace the old hour estimates, which were unrealistic (Moveable snapping 
 
 - [x] **0.1 Create the project**
   - **Do:** in the existing project folder (it already holds `CLAUDE.md` and `docs/`), scaffold Vite in place: `npm create vite@latest . -- --template react-ts` (keep the existing files when asked), then `git init`.
-  - **Details:** add `.gitignore` (node_modules, dist, .env, .env.local, .DS_Store). Create `.env.example` with `VITE_SUPABASE_URL=` and `VITE_SUPABASE_ANON_KEY=` (empty). Create a GitHub repo and push, so there is an off-machine backup from day one.
+  - **Details:** add `.gitignore` (node_modules, dist, .env, .env.local, .DS_Store). Create `.env.example` with `VITE_SUPABASE_URL=` and `VITE_SUPABASE_PUBLISHABLE_KEY=` (empty). Create a GitHub repo and push, so there is an off-machine backup from day one.
   - **Done when:** `npm run dev` serves the default page. First commit made and pushed.
 
 - [x] **0.2 TypeScript strictness and aliases**
@@ -287,7 +287,7 @@ Goal: by the end, the owner can open `/builder`, design a form, undo and redo, p
 
 # Phase 3: Accounts, sharing, responses
 
-- [ ] **3.1 Supabase project**
+- [x] **3.1 Supabase project**
   - **Do:** (owner creates the free project) in Auth settings **turn off email confirmation** for the demo (the free built-in mailer allows only a few emails per hour; note this in the README). Set `.env.local` with the URL and anon key. Run the SQL from `docs/schema.md` section 6 and save it as `supabase/schema.sql`. Install `@supabase/supabase-js`. Create `src/lib/supabase.ts` (single client, throws a helpful error if env vars are missing).
   - **Done when:** a test call to `forms` returns an empty array when logged out (RLS on) and no secrets are committed.
 
