@@ -54,7 +54,7 @@ Rule of thumb: **`lib/` and `pdf/` contain no React.** `components/elements/` co
 - Booleans start with `is`, `has`, `can`, `should`.
 - Event handlers: `onSomething` for props, `handleSomething` for implementations.
 - Store actions are verbs (`addElement`), selectors are nouns (`selectedElements`).
-- Branches: `feat/...`, `fix/...`. Commits follow Conventional Commits (`feat:`, `fix:`, `refactor:`, `test:`, `docs:`, `chore:`).
+- Commits start with `done: <task number> <what>` (the owner prefers this over `feat:` or `chore:`). Use `fix:` for later bug fixes. Work happens on `main` (see section 12).
 
 ---
 

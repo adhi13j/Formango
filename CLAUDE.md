@@ -24,7 +24,7 @@ If documents disagree, this priority wins: `schema.md` (data), then `layout.md` 
 2. Before using a library API, **check its current documentation** (Tailwind v4, shadcn/ui, react-moveable, pdf-lib, Supabase). Do not rely on memory for APIs that change.
 3. Build the task fully, including its **Details**, then verify its **Done when**.
 4. Run `npm run check:fast` (lint, typecheck, unit tests) before each task commit. Run the full `npm run check` (adds contrast check, build, Playwright) at the end of each phase. CI runs the full check on every push. Fix everything before committing.
-5. Commit with a Conventional Commit message. Tick the task's checkbox in `todo.md` in the same commit.
+5. Commit with a message that starts with `done: <task number> <what>` (for example `done: 1.3 text layout engine`), or `fix:` for a later bug fix. Tick the task's checkbox in `todo.md` in the same commit.
 6. **At the end of each phase, stop.** Write a handoff note (below) and wait for the owner. Phase 1 ends with the owner testing the page builder. Phase 1 also has two short mini-checkpoints (after 1.11 and 1.14), marked in `todo.md`. Split any task that will not fit one session and tick the pieces.
 7. If a task is ambiguous or a doc is wrong, ask one concise question or make the smallest sensible choice and note it in `docs/decisions.md` (create it on first use: date, decision, reason).
 

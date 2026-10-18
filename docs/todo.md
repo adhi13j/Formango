@@ -1,6 +1,6 @@
 # To-do list (in order)
 
-Work **top to bottom**. One task at a time. After each task: run the checks in `CLAUDE.md`, then commit with a clear message (`feat(builder): add snapping guides`).
+Work **top to bottom**. One task at a time. After each task: run the checks in `CLAUDE.md`, then commit with a clear message (`done: 1.11 move, resize and snapping`).
 
 **Stop at the end of every phase** and write a short handoff note (what works, what to click, known issues) so the owner can test. **Phase 1 is the first milestone: the owner must be able to test the page builder.**
 
