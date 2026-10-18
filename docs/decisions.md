@@ -122,3 +122,17 @@ Consequences: `layoutText` (task 1.3) measures per-character advances with geome
 | Errors inside a group use ids like `groupId.row.columnId`. A new empty entry does not show errors until submit | Leaving an empty new entry alone should not look like a mistake until the person sends the form |
 | A fixed A4 page and its PDF grow when groups make the content longer | Better than clipping or silently overlapping. Proper pagination is still a later improvement |
 | Blank and fillable PDFs show three empty entries per group (or the fewest allowed if more). Fillable cells are real form fields named `<key>__<row>__<column id>` | A paper copy needs room to write several people |
+
+## 2026-10-18: Phase 3 build decisions
+
+| Decision | Reason |
+|---|---|
+| Public reading of a published form is the RPC `get_published_form(slug)`; the response insert policy uses `form_accepts(form_id, form_rev)`; the file upload policy uses `form_is_published(form_id)` | Anonymous users get no select access to `forms`, so the draft can never leak, and the policies still work (a policy subquery runs with the caller's rights) |
+| The builder is one component for guests and accounts. `BuilderPage` takes an optional `formId` and picks `usePersistence` (IndexedDB) or `useCloudPersistence` (Supabase) | One editor, two backends. The guest builder is unchanged |
+| Autosave writes with `update ... where id = ? and updated_at = ?`; zero rows is a conflict and autosave stops until the owner chooses Reload or Overwrite | No check-then-write race (`schema.md`) |
+| Publishing flushes pending edits, then copies the saved draft server-side (`publish` reads `doc` from the database) | The public copy is exactly what was saved |
+| Images are uploaded to `form-assets/<uid>/<formId>/` during autosave and the data URL is swapped for the public URL without an undo step | Keeps the draft under the 1.5 MB row limit |
+| Respondent files go to the private `response-files` bucket at `<formId>/<responseId>/<fieldId>`; the answer stays the file name | The owner opens them with one-hour signed links |
+| The responses page loads the newest 1000 rows and pages, searches, and sorts them in the browser | Simple and fast enough for v1; the page says when there are more |
+| The cloud end-to-end test only runs with `E2E_CLOUD=1` | It signs up real throwaway accounts on the owner's project |
+| Response counts come from one SQL function (`my_response_counts`) and are blank if it is not installed | Single grouped query, and the page still works without it |

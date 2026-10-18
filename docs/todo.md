@@ -291,33 +291,33 @@ Goal: by the end, the owner can open `/builder`, design a form, undo and redo, p
   - **Do:** (owner creates the free project) in Auth settings **turn off email confirmation** for the demo (the free built-in mailer allows only a few emails per hour; note this in the README). Set `.env.local` with the URL and anon key. Run the SQL from `docs/schema.md` section 6 and save it as `supabase/schema.sql`. Install `@supabase/supabase-js`. Create `src/lib/supabase.ts` (single client, throws a helpful error if env vars are missing).
   - **Done when:** a test call to `forms` returns an empty array when logged out (RLS on) and no secrets are committed.
 
-- [ ] **3.2 Auth**
+- [x] **3.2 Auth**
   - **Do:** `AuthProvider` with session state, `useAuth()` (`user`, `loading`, `signUp`, `signIn`, `signOut`). Email and password. Protected-route wrapper for `/forms/*`.
   - **Details:** show friendly errors (wrong password, already registered, weak password under 8 chars). Keep the user on the page they wanted after login (`redirectTo`). Handle email confirmation if the project requires it (show a "Check your inbox" state). Never log tokens.
   - **Done when:** sign up, sign out, and sign in work, and `/forms` redirects to login when logged out.
 
-- [ ] **3.3 Forms repository**
+- [x] **3.3 Forms repository**
   - **Do:** `src/lib/repo/formsRepo.ts`: `list()`, `get(id)`, `create(doc)`, `saveDoc(id, doc, title)`, `rename`, `duplicate`, `remove` (also deletes the form's Storage folder), `publish(id)` (generates slug on first publish, copies `doc` to `published_doc`, increments `form_rev`, sets `published=true`), `unpublish(id)`, `getPublishedBySlug(slug)` (returns `published_doc` and `form_rev` only, never the draft). Validate every loaded `doc` with Zod and `migrate`.
   - **Done when:** each method has a test with a mocked client, and error cases return typed errors the UI can display.
 
-- [ ] **3.4 Builder on Supabase** (split into four tasks: 3.4a autosave and conflicts, 3.4b image uploads, 3.4c guest handoff, 3.4d publish dialog)
+- [x] **3.4 Builder on Supabase** (split into four tasks: 3.4a autosave and conflicts, 3.4b image uploads, 3.4c guest handoff, 3.4d publish dialog)
   - **Do:** route `/forms/:id/edit` loads the doc into the same builder. Autosave debounced 1.5s, skip when unchanged, show the same save status. Save with a conditional update (`where id = ... and updated_at = <loaded value>`); zero rows updated means a conflict, so show a banner "This form changed in another tab" with **Reload** and **Overwrite**. Autosave writes only the draft `doc`.
   - **Images:** on add (and on first save for existing data URLs) upload to Storage `form-assets/<uid>/<formId>/<nanoid>.<ext>`, store the public URL in `src`. Keep the data URL until the upload finishes. Respect the new 1.5 MB doc limit.
   - **Guest handoff:** after login, if a guest design exists in localStorage, offer "Save your design to your account?" and create the form from it.
   - **Publish:** the top-bar Publish button now opens a dialog: Publish/Unpublish toggle, the link, **Copy link**, an "Unpublished changes" notice with **Republish** when `doc` differs from `published_doc`, QR code is optional later. Link format `${origin}/f/${slug}`.
   - **Done when:** edit, reload, and the changes persist; two tabs show the conflict banner; publish returns a working link.
 
-- [ ] **3.5 My forms page**
+- [x] **3.5 My forms page**
   - **Do:** build screen 2 from `layout.md`. Thumbnails render the doc live (scaled `ElementView` in preview mode, `pointer-events: none`, `contain: strict` for performance), cropped 16:10 from the top. Menu: Responses, Copy link, Duplicate, Delete (confirm dialog naming the form). New form flow: Choose size dialog, create, navigate to the builder.
   - **Details:** skeleton while loading, empty state, optimistic delete with undo toast for 5 seconds, error toast on failure. Response counts via a single grouped query (not one per card).
   - **Done when:** creating, duplicating, and deleting forms works and the list stays correct after reload.
 
-- [ ] **3.6 Public fill route**
+- [x] **3.6 Public fill route**
   - **Do:** `/f/:slug` loads `getPublishedBySlug`, shows the fill page (no app chrome), sets `<title>` to the form title and `<meta name="robots" content="noindex">`. States: loading skeleton, not found, closed.
   - **Details:** swap the `ResponsesRepo` to Supabase insert (`form_id`, `form_rev`, `answers`). Handle failures with a retry button and keep the answers in memory. After a successful submit, the PDF download uses the same in-memory answers.
   - **Done when:** a logged-out incognito window can open the link, submit, and download the PDF, and cannot read anything else.
 
-- [ ] **3.7 Responses page**
+- [x] **3.7 Responses page**
   - **Do:** build screen 5 from `layout.md`: metric cards, search, table, side panel with all answers and **Download PDF**, delete response, pagination (25 per page, server-side `range`), **Export CSV** per `schema.md` section 7.
   - **Done when:** CSV opens correctly in Excel and Google Sheets with accents and commas, a cell starting with `=` is neutralized, and the per-response PDF matches the design.
 
