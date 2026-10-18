@@ -31,9 +31,10 @@ export function PublishDialog({ open, onOpenChange }: PublishDialogProps) {
   const [busy, setBusy] = useState<'publish' | 'unpublish' | null>(null);
   const [copied, setCopied] = useState(false);
 
+  const publishedDoc = meta?.publishedDoc ?? null;
   const hasChanges = useMemo(
-    () => meta?.publishedDoc != null && JSON.stringify(meta.publishedDoc) !== JSON.stringify(doc),
-    [meta?.publishedDoc, doc],
+    () => publishedDoc !== null && JSON.stringify(publishedDoc) !== JSON.stringify(doc),
+    [publishedDoc, doc],
   );
 
   if (!meta) return null;

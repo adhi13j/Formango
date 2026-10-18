@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router';
-import { Toaster } from 'sonner';
 import { downloadPdf } from '@/pdf/downloadPdf';
+import { FillPageFrame } from '@/features/fill/FillPageFrame';
 import { FillForm } from '@/features/fill/FillForm';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -48,26 +48,18 @@ export default function FillLocal() {
   }
 
   return (
-    <div className="flex h-screen flex-col bg-background">
-      <Toaster position="bottom-center" />
-      <main className="min-h-0 flex-1">
-        {state.status === 'ready' ? (
-          <FillForm
-            doc={state.doc}
-            repo={repo}
-            onDownload={(answers) =>
-              downloadPdf(state.doc, answers, 'filled').then(() => undefined)
-            }
-          />
-        ) : (
-          <div className="flex h-full justify-center bg-workspace p-8" aria-busy="true">
-            <Skeleton className="h-[560px] w-[390px] max-w-full bg-card" />
-          </div>
-        )}
-      </main>
-      <footer className="border-t border-border bg-card py-2 text-center text-xs text-muted-foreground">
-        Made with <Link to="/">Formango</Link>
-      </footer>
-    </div>
+    <FillPageFrame>
+      {state.status === 'ready' ? (
+        <FillForm
+          doc={state.doc}
+          repo={repo}
+          onDownload={(answers) => downloadPdf(state.doc, answers, 'filled').then(() => undefined)}
+        />
+      ) : (
+        <div className="flex h-full justify-center bg-workspace p-8" aria-busy="true">
+          <Skeleton className="h-[560px] w-[390px] max-w-full bg-card" />
+        </div>
+      )}
+    </FillPageFrame>
   );
 }

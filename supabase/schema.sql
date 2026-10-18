@@ -90,14 +90,20 @@ create policy "owners delete own assets" on storage.objects
 insert into storage.buckets (id, name, public, file_size_limit)
   values ('response-files', 'response-files', false, 26214400)
   on conflict do nothing;
+-- Anonymous people cannot read the forms table, so the policy asks this function instead.
+create or replace function public.form_is_published(p_form text)
+returns boolean
+language sql security definer set search_path = public stable as $$
+  select exists (select 1 from public.forms f where f.id::text = p_form and f.published)
+$$;
+revoke all on function public.form_is_published(text) from public;
+grant execute on function public.form_is_published(text) to anon, authenticated;
+
 create policy "respondents upload files to published forms" on storage.objects
   for insert to anon, authenticated
   with check (
     bucket_id = 'response-files'
-    and exists (
-      select 1 from public.forms f
-      where f.id::text = (storage.foldername(name))[1] and f.published
-    )
+    and public.form_is_published((storage.foldername(name))[1])
   );
 create policy "owners read response files" on storage.objects
   for select to authenticated

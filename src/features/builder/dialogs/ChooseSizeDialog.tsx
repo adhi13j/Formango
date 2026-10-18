@@ -29,6 +29,43 @@ function PresetIllustration({ preset }: { preset: PagePreset }) {
   );
 }
 
+/** The two page sizes as selectable cards. Used when starting any new design. */
+export function PresetPicker({
+  value,
+  onChange,
+}: {
+  value: PagePreset;
+  onChange: (preset: PagePreset) => void;
+}) {
+  return (
+    <div role="radiogroup" aria-label="Page size" className="grid grid-cols-2 gap-3">
+      {(Object.keys(PRESETS) as PagePreset[]).map((preset) => {
+        const info = PRESETS[preset];
+        const selected = value === preset;
+        return (
+          <button
+            key={preset}
+            type="button"
+            role="radio"
+            aria-checked={selected}
+            onClick={() => onChange(preset)}
+            className={cn(
+              'flex flex-col gap-2 rounded-lg border bg-card p-3 text-left shadow-sm transition-colors',
+              selected
+                ? 'border-primary ring-2 ring-primary'
+                : 'border-border hover:border-border-strong',
+            )}
+          >
+            <PresetIllustration preset={preset} />
+            <span className="font-medium text-foreground">{info.label}</span>
+            <span className="text-sm text-muted-foreground">{info.description}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 export function ChooseSizeDialog() {
   const open = useUiStore((s) => s.sizeDialogOpen);
   const setOpen = useUiStore((s) => s.setSizeDialogOpen);
@@ -53,31 +90,7 @@ export function ChooseSizeDialog() {
               : 'You can change this later from the bar at the bottom.'}
           </DialogDescription>
         </DialogHeader>
-        <div role="radiogroup" aria-label="Page size" className="grid grid-cols-2 gap-3">
-          {(Object.keys(PRESETS) as PagePreset[]).map((preset) => {
-            const info = PRESETS[preset];
-            const selected = choice === preset;
-            return (
-              <button
-                key={preset}
-                type="button"
-                role="radio"
-                aria-checked={selected}
-                onClick={() => setChoice(preset)}
-                className={cn(
-                  'flex flex-col gap-2 rounded-lg border bg-card p-3 text-left shadow-sm transition-colors',
-                  selected
-                    ? 'border-primary ring-2 ring-primary'
-                    : 'border-border hover:border-border-strong',
-                )}
-              >
-                <PresetIllustration preset={preset} />
-                <span className="font-medium text-foreground">{info.label}</span>
-                <span className="text-sm text-muted-foreground">{info.description}</span>
-              </button>
-            );
-          })}
-        </div>
+        <PresetPicker value={choice} onChange={setChoice} />
         <DialogFooter>
           <Button onClick={create}>Create design</Button>
         </DialogFooter>
