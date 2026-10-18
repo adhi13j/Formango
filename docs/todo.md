@@ -36,7 +36,7 @@ Sizes replace the old hour estimates, which were unrealistic (Moveable snapping 
   - **Details:** Prettier: single quotes, semicolons, 100 columns, trailing commas. Lint must fail on unused vars and on `any` (use `unknown` and narrow).
   - **Done when:** `npm run check` passes on the empty project.
 
-- [ ] **0.4 Tailwind v4 and shadcn/ui**
+- [x] **0.4 Tailwind v4 and shadcn/ui**
   - **Do:** follow the current Tailwind v4 Vite install (`@tailwindcss/vite`). Copy `docs/theme.css` to `src/styles/theme.css`. Import order in `src/index.css`: `@import "tailwindcss"; @import "./styles/theme.css";`. Initialize shadcn/ui, choose neutral base, and make sure it uses the semantic tokens from `theme.css` (do **not** let it overwrite the color variables).
   - **Add shadcn components on demand**, in the task that first needs them. For this task add only `button` (to prove the theme). Likely later: input, label, select, popover, dialog, dropdown-menu, tooltip, toggle, toggle-group, slider, tabs, sonner, skeleton, separator, scroll-area, switch.
   - **Details:** global styles: `html { height: 100% }`, `body { min-height: 100% }`, `-webkit-font-smoothing: antialiased`, `box-sizing: border-box` everywhere. Set the focus ring globally to 2px `--ring` with 2px offset.

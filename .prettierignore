@@ -4,3 +4,4 @@ package-lock.json
 docs/theme-preview.html
 docs
 *.md
+src/styles/theme.css
