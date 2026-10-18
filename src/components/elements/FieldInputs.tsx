@@ -1,6 +1,6 @@
 import { Calendar, Check, ChevronDown, FileText, Upload, X } from 'lucide-react';
 import { useRef, useState, type CSSProperties } from 'react';
-import { FIELD_ROW_HEIGHT } from '@/lib/constants';
+import { FIELD_MARK_GAP, FIELD_MARK_SIZE, FIELD_PAD_X, FIELD_ROW_HEIGHT } from '@/lib/constants';
 import { acceptAttribute, checkFile, describeFileRules, formatBytes } from '@/lib/fileTypes';
 import { getAnswerFile, setAnswerFile } from '@/lib/fileAnswers';
 import { FONTS } from '@/lib/fonts';
@@ -10,9 +10,9 @@ import { boxStyle, FILLED_STROKE } from './boxStyle';
 import { SignaturePad } from './SignaturePad';
 import { fontStack, type AnswerValue } from './types';
 
-const PAD_X = 12;
-const MARK_SIZE = 16;
-const MARK_GAP = 10;
+const PAD_X = FIELD_PAD_X;
+const MARK_SIZE = FIELD_MARK_SIZE;
+const MARK_GAP = FIELD_MARK_GAP;
 
 const fill: CSSProperties = { width: '100%', height: '100%' };
 

@@ -130,7 +130,11 @@
 
 /* Form content (builder canvas, preview, fill page) must measure and wrap exactly like the PDF.
    pdf-lib does not kern, and browsers round glyph advances without geometricPrecision. See docs/decisions.md. */
-.doc-text {
+.doc-text,
+.doc-text input,
+.doc-text textarea,
+.doc-text select {
+  /* Form controls reset these properties, so they are set on the controls too. */
   text-rendering: geometricPrecision;
   font-kerning: none;
   font-variant-ligatures: none;

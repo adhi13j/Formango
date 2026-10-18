@@ -24,6 +24,11 @@ const routes: RouteObject[] = [
 
 if (import.meta.env.DEV) {
   routes.unshift({
+    path: '/dev/pdf-compare',
+    lazy: async () => ({ Component: (await import('@/pages/dev/PdfCompare')).default }),
+    hydrateFallbackElement: <RouteLoading />,
+  });
+  routes.unshift({
     path: '/dev/theme',
     lazy: async () => ({ Component: (await import('@/pages/ThemeCheck')).default }),
     hydrateFallbackElement: <RouteLoading />,

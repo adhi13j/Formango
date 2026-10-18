@@ -238,7 +238,7 @@ Goal: by the end, the owner can open `/builder`, design a form, undo and redo, p
   - **Do:** for now, "Submit" saves to `localStorage['formango:builder:responses:v1']` as `{ id, createdAt, answers }[]` through a `ResponsesRepo` interface (`create`, `list`). Phase 3 swaps the implementation to Supabase without touching the UI.
   - **Done when:** submitting twice stores two entries and they survive a reload.
 
-- [ ] **2.5 PDF exporter: setup and geometry**
+- [x] **2.5 PDF exporter: setup and geometry**
   - **Do:** `src/pdf/exportPdf.ts` with `exportPdf(doc, answers | null, { mode: 'filled' | 'fillable' }) => Promise<Uint8Array>`. Lazy-load pdf-lib and fontkit with dynamic `import()` on first use.
   - **Details:**
     - **Page size and scale:** A4 = 595.28 x 841.89 pt, `scale = 595.28 / page.width`. Mobile preset: page width 595.28 pt, height `displayHeight * scale`.
@@ -248,7 +248,7 @@ Goal: by the end, the owner can open `/builder`, design a form, undo and redo, p
     - **Missing glyphs:** wrap text encoding in try/catch, replace unsupported characters with `?`, and return a `warnings: string[]` list so the UI can tell the user.
   - **Done when:** a doc with only a page background and a rectangle exports a correct PDF whose rectangle lines up with the builder (check visually).
 
-- [ ] **2.6 PDF exporter: drawing elements**
+- [x] **2.6 PDF exporter: drawing elements**
   - **Details:**
     - **Shapes:** rect with radius drawn with `drawSvgPath` using a rounded-rect path (remember SVG paths are y-down, so position the path origin at the element's top-left in PDF space). Ellipse with `drawEllipse`. **Stroke alignment:** CSS borders are inside the box, PDF strokes are centered, so inset the geometry by `strokeWidth / 2`.
     - **Lines:** `drawLine` with thickness, dash array `[6, 4]` x scale for dashed.
@@ -257,7 +257,7 @@ Goal: by the end, the owner can open `/builder`, design a form, undo and redo, p
     - **Order and visibility:** z-order as in the array, skip hidden.
   - **Done when:** an automated Playwright test renders each element type in both presets, converts the exported PDF to PNG with `pdfjs-dist` (dev dependency), and compares it with the DOM screenshot using `pixelmatch` within a small tolerance. Also build the `/dev/pdf-compare` page (DOM on the left, PDF in an `<iframe>` from a Blob URL on the right) as a debugging aid.
 
-- [ ] **2.7 PDF exporter: fields (filled mode)**
+- [x] **2.7 PDF exporter: fields (filled mode)**
   - **Details:**
     - Draw the label (single line, truncated with an ellipsis), required asterisk, and the input box with fill, border, and radius (inset by half the stroke).
     - `text`/`dropdown`/`date`: one line of answer text vertically centered in the box, truncated with an ellipsis. Dropdown adds a chevron drawn with two lines at the right. Date uses `DD MMM YYYY`.

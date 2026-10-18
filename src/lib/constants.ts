@@ -29,6 +29,10 @@ export const FIELD_ROW_HEIGHT = 32;
 export const FIELD_BOX_MIN_HEIGHT = 32;
 export const SIGNATURE_MIN_HEIGHT = 120;
 export const LABEL_LINE_HEIGHT = 1.3;
+/** Inside a field box: text padding, and the checkbox or radio mark and its gap to the option text. */
+export const FIELD_PAD_X = 12;
+export const FIELD_MARK_SIZE = 16;
+export const FIELD_MARK_GAP = 10;
 
 export interface PresetInfo {
   width: number;
