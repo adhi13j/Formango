@@ -26,17 +26,18 @@ test.describe('PDF downloads', () => {
       .getFields()
       .map((field) => field.getName())
       .sort();
-    expect(names).toEqual(
-      [
-        'dietary-needs__0',
-        'dietary-needs__1',
-        'dietary-needs__2',
-        'dietary-needs__3',
-        'email',
-        'full-name',
-        'ticket-type',
-      ].sort(),
-    );
+    const expected = [
+      'dietary-needs__0',
+      'dietary-needs__1',
+      'dietary-needs__2',
+      'dietary-needs__3',
+      'email',
+      'full-name',
+      'ticket-type',
+      // The guest list shows three blank entries to write in.
+      ...[0, 1, 2].flatMap((row) => [`guests__${row}__c1`, `guests__${row}__c2`]),
+    ];
+    expect(names).toEqual(expected.sort());
   });
 
   test('the success screen downloads a copy of the answers', async ({ page }) => {
