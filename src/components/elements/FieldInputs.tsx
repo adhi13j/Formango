@@ -6,31 +6,13 @@ import { getAnswerFile, setAnswerFile } from '@/lib/fileAnswers';
 import { FONTS } from '@/lib/fonts';
 import { truncateToWidth } from '@/lib/text/layoutText';
 import type { FieldElement, InputStyle } from '@/types/doc';
+import { boxStyle, FILLED_STROKE } from './boxStyle';
+import { SignaturePad } from './SignaturePad';
 import { fontStack, type AnswerValue } from './types';
 
 const PAD_X = 12;
 const MARK_SIZE = 16;
 const MARK_GAP = 10;
-
-/** Border color of a box that has been filled in. Screen only: the PDF keeps the designed stroke. */
-export const FILLED_STROKE = 'var(--leaf-500)';
-
-export function boxStyle(s: InputStyle, filled = false, dashed = false): CSSProperties {
-  const color = filled ? FILLED_STROKE : s.stroke;
-  return {
-    boxSizing: 'border-box',
-    background: s.fill,
-    border:
-      s.strokeWidth > 0 ? `${s.strokeWidth}px ${dashed ? 'dashed' : 'solid'} ${color}` : 'none',
-    // A box designed without a border still shows it is filled.
-    boxShadow: filled && s.strokeWidth === 0 ? `inset 0 0 0 2px ${FILLED_STROKE}` : 'none',
-    transition: 'border-color 150ms ease, box-shadow 150ms ease',
-    borderRadius: s.radius,
-    color: s.textColor,
-    fontFamily: fontStack(FONTS[s.fontFamily].family),
-    fontSize: s.fontSize,
-  };
-}
 
 const fill: CSSProperties = { width: '100%', height: '100%' };
 
@@ -418,7 +400,19 @@ function FileControl({ el, inputId, value, error, describedBy, onChange }: Input
 export function FieldInput(props: InputProps) {
   const { el, interactive } = props;
   if (el.fieldType === 'radio' || el.fieldType === 'checkbox') return <ChoiceList {...props} />;
-  if (!interactive || el.fieldType === 'signature') return <EditBox el={el} />;
+  if (!interactive) return <EditBox el={el} />;
+  if (el.fieldType === 'signature') {
+    return (
+      <SignaturePad
+        el={el}
+        inputId={props.inputId}
+        value={typeof props.value === 'string' ? props.value : undefined}
+        describedBy={props.describedBy}
+        invalid={Boolean(props.error)}
+        onChange={props.onChange}
+      />
+    );
+  }
   if (el.fieldType === 'file') return <FileControl {...props} />;
   return <RealControl {...props} />;
 }

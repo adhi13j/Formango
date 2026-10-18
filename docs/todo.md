@@ -219,7 +219,7 @@ Goal: by the end, the owner can open `/builder`, design a form, undo and redo, p
 
 # Phase 2: Fill page and PDF export
 
-- [ ] **2.1 Answers state and validation**
+- [x] **2.1 Answers state and validation**
   - **Do:** `src/lib/answers.ts`: `validateAnswers(doc, answers) => Record<elementId, string>` (error messages), `isEmptyAnswer`, `formatDate`. Rules in `schema.md` (required, email, phone, number, max lengths, options must exist).
   - **Details:** messages are short and human ("Enter a valid email", "This field is required"). Hidden fields are skipped. Trim whitespace before validating.
   - **Done when:** tests cover every field type and rule.
@@ -229,7 +229,7 @@ Goal: by the end, the owner can open `/builder`, design a form, undo and redo, p
   - **Details:** Page view of a Mobile form on a phone scales to the screen width, clamped 0.85 to 1.15 (`layout.md`). A4 Page view scales down to fit a narrow window (never up). Load only the fonts the doc uses (`loadFonts`). The Submit button is an element (`ButtonView`, already built; pass `onSubmit`). List view sorts by `y` then `x`, skips shapes and lines, and ends with the Submit button. Validate on blur, then on change after the first error, and on submit; focus and scroll to the first error. Honeypot input (visually hidden, `tabindex=-1`, `autocomplete=off`), and block submission faster than 2 seconds after mount. Success screen with "Download my copy (PDF)" and "Submit another response".
   - **Done when:** the form works with keyboard only and on a 390px wide viewport with no horizontal scroll.
 
-- [ ] **2.3 Signature pad**
+- [x] **2.3 Signature pad**
   - **Do:** `SignaturePad.tsx` inside the signature field in `fill`/`preview` mode, with three tabs: **Draw**, **Type**, **Upload** (owner request: drawing on a laptop trackpad is awkward). Draw: Pointer Events, canvas scaled by `devicePixelRatio`, smooth strokes (quadratic curves between midpoints), `touch-action: none`, Clear, line `ink-900`, width 2.5px. Type: a text input rendered in Caveat. Upload: PNG, JPEG, or WebP of a signature (scanned or photographed), scaled down.
   - **Details:** every route ends as one PNG data URL: logical size 400 x 150, cropped to the ink bounds with 8px padding and re-scaled so output stays under about 60 KB (uploads are drawn onto the same canvas, fitted and centered). Track `hasInk` so an empty pad counts as no answer. The field shows the signature with a green border once signed, and a "Change signature" button.
   - **Done when:** drawing is smooth on mouse and touch, Clear works, typing and uploading produce a signature, and the answer is a valid PNG data URL under the size limit.

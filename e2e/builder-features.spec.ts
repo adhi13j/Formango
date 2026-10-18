@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import { addFromRail, dragBy, elements, startBuilder, submitButton } from './helpers';
 
 test.describe('submit button', () => {
@@ -110,5 +110,55 @@ test.describe('layout grid', () => {
     await expect(page.getByTestId('grid-overlay')).toHaveCount(0);
     await page.getByRole('button', { name: /layout grid/i }).click();
     await expect(page.getByTestId('grid-overlay')).toBeVisible();
+  });
+});
+
+const TINY_PNG = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
+  'base64',
+);
+
+test.describe('signature field', () => {
+  async function previewSignature(page: Page) {
+    await startBuilder(page);
+    await addFromRail(page, 'Fields', /Signature/);
+    await page.getByRole('button', { name: 'Preview' }).click();
+    return page.getByRole('group', { name: /Signature/ });
+  }
+
+  test('can be drawn with the mouse, turns green, and Clear empties it', async ({ page }) => {
+    const group = await previewSignature(page);
+    await expect(page.getByRole('button', { name: 'Clear' })).toHaveCount(0);
+    const canvas = page.getByLabel('Signature drawing area');
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('no canvas');
+    await page.mouse.move(box.x + 30, box.y + 30);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 90, box.y + 60, { steps: 6 });
+    await page.mouse.move(box.x + 150, box.y + 30, { steps: 6 });
+    await page.mouse.up();
+    await expect(page.getByRole('button', { name: 'Clear' })).toBeVisible();
+    await expect(group).toHaveCSS('border-top-color', 'rgb(76, 154, 42)');
+    await page.getByRole('button', { name: 'Clear' }).click();
+    await expect(page.getByRole('button', { name: 'Clear' })).toHaveCount(0);
+  });
+
+  test('can be typed, which works without a mouse', async ({ page }) => {
+    await previewSignature(page);
+    await page.getByRole('button', { name: 'Type', exact: true }).click();
+    await page.getByLabel('Type your name to sign').fill('Asha Rao');
+    await expect(page.getByRole('button', { name: 'Clear' })).toBeVisible();
+    await page.getByLabel('Type your name to sign').fill('');
+    await expect(page.getByRole('button', { name: 'Clear' })).toHaveCount(0);
+  });
+
+  test('can be uploaded as an image', async ({ page }) => {
+    await previewSignature(page);
+    await page.getByRole('button', { name: 'Upload', exact: true }).click();
+    await page
+      .locator('input[accept^="image/png"]')
+      .setInputFiles({ name: 'sig.png', mimeType: 'image/png', buffer: TINY_PNG });
+    await expect(page.getByAltText('Your signature')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Clear' })).toBeVisible();
   });
 });
