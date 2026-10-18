@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { FONT_IDS, FONTS, loadAllFonts } from '@/lib/fonts';
 
-export default function App() {
+export default function ThemeCheck() {
   const [fontsReady, setFontsReady] = useState(false);
 
   useEffect(() => {

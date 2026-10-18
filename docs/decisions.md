@@ -45,3 +45,17 @@ Measured 112 samples (7 fonts x 2 weights x 2 sizes x 4 strings, including kerni
 | Decision: filled PDFs may subset, fillable PDFs embed the full font (`subset: false`) | The extra size is about 45 KB per font |
 
 Consequences: `layoutText` (task 1.3) measures per-character advances with geometricPrecision, `.doc-text` sets all three CSS properties, and PDF export passes the feature flags. A cross-browser check (Chrome, Firefox, Safari) of line breaks is added to the Phase 1 QA, since other browsers may round differently.
+
+## 2026-10-18: Phase 0 build decisions
+
+| Decision | Reason |
+|---|---|
+| Use `react-router` (v7+), import `RouterProvider` from `react-router/dom`, not `react-router-dom` | Current docs recommend it |
+| `shadcn init` is not run. `components.json` is hand-written and components are added with `npx shadcn add` | `init` overwrites the theme colour variables. The CLI also installed a stray `cn` npm package when it could not resolve `@/lib/utils`, which was removed in favour of a local `cn()` |
+| ESLint kept, oxlint (the Vite template default) removed | CLAUDE.md requires ESLint with no-`any` rules |
+| `check:contrast` runs `node scripts/check-contrast.ts` (Node runs TypeScript directly) and reads its pairs from `docs/theme-preview.html`; it also fails if `src/styles/theme.css` differs from `docs/theme.css` | No `tsx` dependency, one list of pairs, and the two theme copies cannot drift |
+| Semantic-token pairs (`--primary-foreground` on `--primary`, etc.) added to the contrast list | Otherwise changing `--primary-foreground` could not fail the check |
+| `--color-primary-hover` mapped in `theme.css` and used by the button | The theme says hover is mango-600 and shadcn defaults to a 90% opacity mix |
+| Prettier ignores `*.md`, `docs/`, and `src/styles/theme.css` | It reformatted the doc tables and lowercased the theme hex values |
+| `/dev/theme` is a dev-only route (`import.meta.env.DEV`) and the Builder route is lazy | Keeps the theme page out of production and the builder out of the fill page bundle |
+| Commit messages start with `done: <task>` | Owner preference |

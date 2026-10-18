@@ -62,12 +62,12 @@ Sizes replace the old hour estimates, which were unrealistic (Moveable snapping 
   - **Done when:** `npm test` passes.
   - **Also:** install Playwright (Chromium only) with `npm run test:e2e` and one trivial test that loads `/`. Add it to `npm run check`. Real e2e tests arrive in 1.11 and 2.x.
 
-- [ ] **0.8 Folder structure and router skeleton**
+- [x] **0.8 Folder structure and router skeleton**
   - **Do:** create the folders from `conventions.md`. Install `react-router-dom`. Routes: `/` (placeholder "Landing"), `/builder` (placeholder), `*` (NotFound page with a link home).
   - **Details:** `src/app/App.tsx`, `src/app/routes.tsx`, `src/app/ErrorBoundary.tsx` (friendly fallback with Reload button). Add `<title>` per route. Add favicon (a simple mango SVG in `public/favicon.svg`) and `lang="en"`.
   - **Done when:** all three routes render, an intentionally thrown error shows the fallback.
 
-- [ ] **0.9 Phase 0 checkpoint**
+- [x] **0.9 Phase 0 checkpoint**
   - **Do:** run `npm run check`. Commit. Write the handoff note. Ask the owner to open `docs/theme-preview.html` and the running app and approve the look before Phase 1.
 
 ---
