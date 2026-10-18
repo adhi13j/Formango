@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Formango theme preview</title>
+<!--
+  Open this file in a browser to check the mango theme.
+  The :root block below is a COPY of theme.css (section 1 and 2).
+  If you change theme.css, update this block too. theme.css is the source of truth.
+-->
+<style>
+:root{
+  --mango-50:#FFF9EE;--mango-100:#FFF1D6;--mango-200:#FFE2AB;--mango-300:#FFCF78;--mango-400:#FFB84A;
+  --mango-500:#FF9F1C;--mango-600:#F08400;--mango-700:#C76A00;--mango-800:#8F4D06;--mango-900:#5C3207;
+  --ink-900:#2A1805;--ink-700:#4A3219;--ink-500:#7A5C3A;--ink-400:#A58B6A;--ink-300:#C9B497;
+  --cream-50:#FFFCF7;--cream-100:#FFF6E8;--cream-200:#F6EAD7;--cream-300:#EBDCC3;--cream-400:#E0CBA8;
+  --leaf-100:#E6F4DC;--leaf-500:#4C9A2A;--leaf-700:#2F6B16;
+  --berry-100:#FDE7E9;--berry-500:#CF3340;--berry-700:#A12633;
+  --sun-100:#FFF4CC;--sun-500:#E5A100;--sun-700:#7A5600;
+  --selection:#4F46E5;--guide:#FF2D87;--workspace:#F6EAD7;
+  --background:var(--cream-50);--foreground:var(--ink-900);--card:#FFFFFF;
+  --primary:var(--mango-500);--primary-foreground:var(--ink-900);--primary-hover:var(--mango-600);
+  --secondary:var(--cream-100);--muted:var(--cream-100);--muted-foreground:var(--ink-500);
+  --accent:var(--mango-100);--accent-foreground:var(--mango-800);
+  --destructive:var(--berry-500);--destructive-foreground:#FFFFFF;
+  --success:var(--leaf-700);--success-bg:var(--leaf-100);--warning:var(--sun-700);--warning-bg:var(--sun-100);--danger-bg:var(--berry-100);
+  --border:#F0E3CF;--border-strong:var(--cream-400);--input:var(--ink-400);--ring:var(--mango-500);
+  --radius:12px;--radius-control:8px;
+  --shadow-md:0 4px 12px rgba(120,70,0,.12);--shadow-page:0 2px 8px rgba(120,70,0,.10),0 12px 40px rgba(120,70,0,.12);
+  --font-sans:"DM Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--background);color:var(--foreground);font-family:var(--font-sans);line-height:1.5}
+main{max-width:1000px;margin:0 auto;padding:32px 20px 64px}
+h1{font-size:28px;margin:0 0 4px}
+h2{font-size:18px;margin:36px 0 12px}
+p.sub{color:var(--muted-foreground);margin:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.sw{border:1px solid var(--border);border-radius:var(--radius-control);overflow:hidden;background:#fff;font-size:12px}
+.sw i{display:block;height:52px}
+.sw div{padding:6px 8px}
+.sw b{display:block;font-weight:600}
+.sw span{color:var(--muted-foreground);font-family:ui-monospace,Menlo,monospace}
+table{border-collapse:collapse;width:100%;font-size:14px;background:#fff;border:1px solid var(--border);border-radius:var(--radius-control);overflow:hidden}
+td,th{padding:8px 12px;border-bottom:1px solid var(--border);text-align:left}
+.pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:600}
+.pass{background:var(--success-bg);color:var(--success)}
+.fail{background:var(--danger-bg);color:var(--berry-700)}
+.sample{padding:3px 10px;border-radius:6px;font-weight:600}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.btn{font:inherit;font-weight:600;padding:9px 16px;border-radius:var(--radius-control);border:1px solid transparent;cursor:pointer}
+.btn.p{background:var(--primary);color:var(--primary-foreground)}
+.btn.p:hover{background:var(--primary-hover)}
+.btn.s{background:var(--secondary);color:var(--foreground);border-color:var(--border-strong)}
+.btn.g{background:transparent;color:var(--accent-foreground)}
+.btn.d{background:var(--destructive);color:var(--destructive-foreground)}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow-md)}
+input.in,select.in{font:inherit;padding:9px 12px;border-radius:var(--radius-control);border:1px solid var(--input);background:#fff;color:var(--foreground);width:240px}
+input.in:focus{outline:2px solid var(--ring);outline-offset:1px}
+input.in::placeholder{color:var(--muted-foreground)}
+.toast{padding:10px 14px;border-radius:var(--radius-control);font-size:14px;font-weight:500}
+.hero{border-radius:var(--radius);padding:28px;background:linear-gradient(135deg,var(--mango-300),var(--mango-500));color:var(--ink-900)}
+.hero h3{margin:0 0 4px;font-size:24px}
+.ws{background:var(--workspace);border-radius:var(--radius);padding:28px;display:flex;justify-content:center}
+.page{position:relative;width:260px;height:300px;background:#fff;box-shadow:var(--shadow-page)}
+.el{position:absolute;border-radius:6px}
+.sel{outline:2px solid var(--selection)}
+.h{position:absolute;width:9px;height:9px;background:#fff;border:2px solid var(--selection);border-radius:2px}
+.guide{position:absolute;background:var(--guide)}
+</style>
+</head>
+<body>
+<main>
+  <h1>Formango theme preview</h1>
+  <p class="sub">Mango / orange. Check the palette, the contrast ratios, and how the pieces look together.</p>
+
+  <h2>Brand palette</h2>
+  <div class="grid" id="g-mango"></div>
+
+  <h2>Ink and cream (neutrals)</h2>
+  <div class="grid" id="g-neutral"></div>
+
+  <h2>Status and editor colors</h2>
+  <div class="grid" id="g-status"></div>
+
+  <h2>Contrast checks (WCAG)</h2>
+  <p class="sub">Text needs 4.5:1. Large text and UI outlines need 3:1.</p>
+  <table id="contrast"><thead><tr><th>Pair</th><th>Sample</th><th>Ratio</th><th>Result</th></tr></thead><tbody></tbody></table>
+
+  <h2>Buttons and inputs</h2>
+  <div class="card">
+    <div class="row" style="margin-bottom:14px">
+      <button class="btn p">Publish form</button>
+      <button class="btn s">Preview</button>
+      <button class="btn g">Cancel</button>
+      <button class="btn d">Delete</button>
+    </div>
+    <div class="row">
+      <input class="in" placeholder="Full name">
+      <select class="in"><option>Dropdown option</option></select>
+    </div>
+  </div>
+
+  <h2>Messages</h2>
+  <div class="row">
+    <div class="toast" style="background:var(--success-bg);color:var(--success)">Saved</div>
+    <div class="toast" style="background:var(--warning-bg);color:var(--warning)">Unsaved changes</div>
+    <div class="toast" style="background:var(--danger-bg);color:var(--berry-700)">Could not save</div>
+  </div>
+
+  <h2>Landing hero</h2>
+  <div class="hero"><h3>Forms that look like you</h3><p style="margin:0">Design it like a document. Fill it like a form. Export it as a PDF.</p></div>
+
+  <h2>Builder workspace</h2>
+  <div class="ws">
+    <div class="page">
+      <div class="el" style="left:20px;top:20px;width:220px;height:44px;background:var(--mango-500)"></div>
+      <div class="el sel" style="left:20px;top:84px;width:220px;height:48px;background:var(--cream-100);border:1px solid var(--input)">
+        <span class="h" style="left:-6px;top:-6px"></span><span class="h" style="right:-6px;top:-6px"></span>
+        <span class="h" style="left:-6px;bottom:-6px"></span><span class="h" style="right:-6px;bottom:-6px"></span>
+      </div>
+      <div class="el" style="left:20px;top:152px;width:104px;height:48px;background:var(--cream-100);border:1px solid var(--input)"></div>
+      <div class="el" style="left:136px;top:152px;width:104px;height:48px;background:var(--cream-100);border:1px solid var(--input)"></div>
+      <div class="guide" style="left:130px;top:0;width:1px;height:300px"></div>
+    </div>
+  </div>
+  <p class="sub" style="margin-top:8px">Indigo outline = selection. Pink line = snap guide. Both are chosen to stand out against orange designs.</p>
+</main>
+
+<script>
+const css = getComputedStyle(document.documentElement);
+const v = n => css.getPropertyValue(n).trim();
+const groups = {
+  'g-mango':  ['mango-50','mango-100','mango-200','mango-300','mango-400','mango-500','mango-600','mango-700','mango-800','mango-900'],
+  'g-neutral':['ink-900','ink-700','ink-500','ink-400','ink-300','cream-50','cream-100','cream-200','cream-300','cream-400'],
+  'g-status': ['leaf-100','leaf-500','leaf-700','berry-100','berry-500','berry-700','sun-100','sun-500','sun-700','selection','guide','workspace']
+};
+for (const [id, names] of Object.entries(groups)) {
+  document.getElementById(id).innerHTML = names.map(n =>
+    `<div class="sw"><i style="background:var(--${n})"></i><div><b>${n}</b><span>${v('--'+n)}</span></div></div>`).join('');
+}
+function lum(hex){
+  const c = hex.replace('#','').match(/.{2}/g).map(h => parseInt(h,16)/255)
+    .map(x => x <= 0.03928 ? x/12.92 : Math.pow((x+0.055)/1.055, 2.4));
+  return 0.2126*c[0] + 0.7152*c[1] + 0.0722*c[2];
+}
+function ratio(a,b){ const [x,y] = [lum(a),lum(b)].sort((p,q)=>q-p); return (x+0.05)/(y+0.05); }
+// [label, foreground var, background var, minimum ratio]
+const pairs = [
+  ['Body text on page',            '--ink-900',  '--cream-50', 4.5],
+  ['Muted text on page',           '--ink-500',  '--cream-50', 4.5],
+  ['Muted text on cream-100',      '--ink-500',  '--cream-100',4.5],
+  ['Button text on mango-500',     '--ink-900',  '--mango-500',4.5],
+  ['Button text on mango-600 (hover)','--ink-900','--mango-600',4.5],
+  ['Accent text on mango-100',     '--mango-800','--mango-100',4.5],
+  ['Accent text on white',         '--mango-800','#FFFFFF',    4.5],
+  ['Mango-700 on white (icons, large text only)','--mango-700','#FFFFFF',3],
+  ['Destructive button text',      '#FFFFFF',    '--berry-500',4.5],
+  ['Success text on success bg',   '--leaf-700', '--leaf-100', 4.5],
+  ['Warning text on warning bg',   '--sun-700',  '--sun-100',  4.5],
+  ['Error text on error bg',       '--berry-700','--berry-100',4.5],
+  ['Input border on white (UI)',   '--input',    '#FFFFFF',    3],
+  ['Selection outline on mango-500','--selection','--mango-500',3],
+  ['Guide line on white',          '--guide',    '#FFFFFF',    3]
+];
+const resolve = x => x.startsWith('--') ? v(x) : x;
+document.querySelector('#contrast tbody').innerHTML = pairs.map(([label,f,b,min]) => {
+  const fg = resolve(f), bg = resolve(b), r = ratio(fg,bg), ok = r >= min;
+  return `<tr><td>${label}<br><small style="color:var(--muted-foreground)">${fg} on ${bg} (needs ${min}:1)</small></td>
+  <td><span class="sample" style="color:${fg};background:${bg};border:1px solid var(--border)">Aa Sample</span></td>
+  <td>${r.toFixed(2)}:1</td><td><span class="pill ${ok?'pass':'fail'}">${ok?'Pass':'Fail'}</span></td></tr>`;
+}).join('');
+</script>
+</body>
+</html>
