@@ -228,6 +228,7 @@ test.describe('page size', () => {
 
   test('toggling the layout grid removes its snap lines', async ({ page }) => {
     await startBuilder(page);
+    await page.getByRole('button', { name: /layout grid/i }).click();
     await addFromRail(page, 'Elements', /^Circle or ellipse/);
     // The circle's center sits at x=195. With the grid on, 2px left snaps to 195 (page center) regardless;
     // x=190 is a grid column line only: dragging so the center lands near 190 snaps with grid on, not off.

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ElementView } from '@/components/elements/ElementView';
+import { hasContent } from '@/lib/submitButton';
 import { TEMPLATES, type Template } from '@/templates';
 import { useDocStore } from '@/store/docStore';
 import { useUiStore } from '@/store/uiStore';
@@ -46,7 +47,7 @@ export function TemplatesPanel() {
     zoomToFit();
   };
   const choose = (template: Template) => {
-    if (useDocStore.getState().doc.elements.length === 0) apply(template);
+    if (!hasContent(useDocStore.getState().doc)) apply(template);
     else setPending(template);
   };
 

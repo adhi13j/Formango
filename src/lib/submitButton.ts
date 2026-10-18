@@ -9,6 +9,11 @@ export function isButton(el: DocElement): el is ButtonElement {
   return el.type === 'button';
 }
 
+/** True when the page holds anything besides the submit button every form starts with. */
+export function hasContent(doc: Pick<FormDoc, 'elements'>): boolean {
+  return doc.elements.some((el) => el.type !== 'button');
+}
+
 /** The submit button of a form, or undefined for a document that has not been normalized yet. */
 export function findSubmitButton(doc: Pick<FormDoc, 'elements'>): ButtonElement | undefined {
   return doc.elements.find(isButton);

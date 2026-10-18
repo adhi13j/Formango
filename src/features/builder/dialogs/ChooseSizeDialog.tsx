@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dialog';
 import { PRESETS } from '@/lib/constants';
 import { cn } from '@/lib/utils';
+import { hasContent } from '@/lib/submitButton';
 import { useDocStore } from '@/store/docStore';
 import { useUiStore } from '@/store/uiStore';
 import type { PagePreset } from '@/types/doc';
@@ -31,7 +32,7 @@ function PresetIllustration({ preset }: { preset: PagePreset }) {
 export function ChooseSizeDialog() {
   const open = useUiStore((s) => s.sizeDialogOpen);
   const setOpen = useUiStore((s) => s.setSizeDialogOpen);
-  const hasContent = useDocStore((s) => s.doc.elements.length > 0);
+  const pageHasContent = useDocStore((s) => hasContent(s.doc));
   const [choice, setChoice] = useState<PagePreset>('mobile');
 
   const create = () => {
@@ -47,7 +48,7 @@ export function ChooseSizeDialog() {
         <DialogHeader>
           <DialogTitle>Choose a size</DialogTitle>
           <DialogDescription>
-            {hasContent
+            {pageHasContent
               ? 'This starts a new design. You can undo it right after.'
               : 'You can change this later from the bar at the bottom.'}
           </DialogDescription>

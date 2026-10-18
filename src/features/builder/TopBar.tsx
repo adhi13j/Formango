@@ -17,6 +17,7 @@ import { exportJson, importJsonFile } from '@/lib/persistence';
 import { temporalStore, useDocStore } from '@/store/docStore';
 import { useUiStore } from '@/store/uiStore';
 import type { FormDoc } from '@/types/doc';
+import { hasContent } from '@/lib/submitButton';
 import { redo, undo } from './editorActions';
 import { addSampleElements } from './devTools';
 import { ConfirmDialog } from './dialogs/ConfirmDialog';
@@ -90,7 +91,7 @@ export function TopBar() {
       toast.error(`Could not import that file. ${result.errors[0] ?? ''}`);
       return;
     }
-    if (useDocStore.getState().doc.elements.length === 0) applyImport(result.doc);
+    if (!hasContent(useDocStore.getState().doc)) applyImport(result.doc);
     else setPendingImport(result.doc);
   };
 
@@ -150,7 +151,7 @@ export function TopBar() {
             <DropdownMenuItem
               onSelect={() => {
                 // Nothing to lose on an empty page, so skip the prompt.
-                if (useDocStore.getState().doc.elements.length === 0) {
+                if (!hasContent(useDocStore.getState().doc)) {
                   useUiStore.getState().setSizeDialogOpen(true);
                 } else {
                   setConfirmNew(true);

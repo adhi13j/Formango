@@ -15,12 +15,13 @@ const MARK_GAP = 10;
 /** Border color of a box that has been filled in. Screen only: the PDF keeps the designed stroke. */
 export const FILLED_STROKE = 'var(--leaf-500)';
 
-export function boxStyle(s: InputStyle, filled = false): CSSProperties {
+export function boxStyle(s: InputStyle, filled = false, dashed = false): CSSProperties {
   const color = filled ? FILLED_STROKE : s.stroke;
   return {
     boxSizing: 'border-box',
     background: s.fill,
-    border: s.strokeWidth > 0 ? `${s.strokeWidth}px solid ${color}` : 'none',
+    border:
+      s.strokeWidth > 0 ? `${s.strokeWidth}px ${dashed ? 'dashed' : 'solid'} ${color}` : 'none',
     // A box designed without a border still shows it is filled.
     boxShadow: filled && s.strokeWidth === 0 ? `inset 0 0 0 2px ${FILLED_STROKE}` : 'none',
     transition: 'border-color 150ms ease, box-shadow 150ms ease',
@@ -74,14 +75,13 @@ function EditBox({ el }: { el: FieldElement }) {
     <div
       style={{
         ...fill,
-        ...boxStyle(s),
+        ...boxStyle(s, false, isSignature || isFile),
         display: 'flex',
         alignItems: isLong || isSignature ? 'flex-start' : 'center',
         justifyContent: 'space-between',
         gap: 8,
         padding: isLong || isSignature ? PAD_X : `0 ${PAD_X}px`,
         overflow: 'hidden',
-        ...(isSignature ? { borderStyle: 'dashed' } : null),
       }}
     >
       {isSignature ? (
@@ -337,8 +337,7 @@ function FileControl({ el, inputId, value, error, describedBy, onChange }: Input
       <div
         style={{
           ...fill,
-          ...boxStyle(s, filled),
-          ...(filled || shownError ? null : { borderStyle: 'dashed' }),
+          ...boxStyle(s, filled, !filled && !shownError),
           display: 'flex',
           alignItems: 'center',
           gap: 10,

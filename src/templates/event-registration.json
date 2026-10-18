@@ -8,12 +8,7 @@
     "autoHeight": true,
     "background": "#FFFFFF",
     "outerBackground": "#FFF1D6",
-    "margin": 20,
-    "submit": {
-      "label": "Register",
-      "fill": "#FF9F1C",
-      "textColor": "#2A1805"
-    }
+    "margin": 20
   },
   "elements": [
     {
@@ -90,6 +85,8 @@
       "required": true,
       "validation": "none",
       "options": [],
+      "fileKinds": [],
+      "maxFileMb": 5,
       "labelStyle": {
         "fontFamily": "dm-sans",
         "fontSize": 14,
@@ -123,6 +120,8 @@
       "required": true,
       "validation": "email",
       "options": [],
+      "fileKinds": [],
+      "maxFileMb": 5,
       "labelStyle": {
         "fontFamily": "dm-sans",
         "fontSize": 14,
@@ -156,6 +155,8 @@
       "required": true,
       "validation": "none",
       "options": ["Standard", "VIP", "Student"],
+      "fileKinds": [],
+      "maxFileMb": 5,
       "labelStyle": {
         "fontFamily": "dm-sans",
         "fontSize": 14,
@@ -189,6 +190,8 @@
       "required": false,
       "validation": "none",
       "options": ["Vegetarian", "Vegan", "Gluten free", "Nut allergy"],
+      "fileKinds": [],
+      "maxFileMb": 5,
       "labelStyle": {
         "fontFamily": "dm-sans",
         "fontSize": 14,
@@ -222,6 +225,8 @@
       "required": true,
       "validation": "none",
       "options": [],
+      "fileKinds": [],
+      "maxFileMb": 5,
       "labelStyle": {
         "fontFamily": "dm-sans",
         "fontSize": 14,
@@ -237,6 +242,24 @@
         "strokeWidth": 1,
         "radius": 8
       }
+    },
+    {
+      "id": "e-submit",
+      "name": "Submit button",
+      "x": 20,
+      "y": 834,
+      "width": 350,
+      "height": 48,
+      "locked": false,
+      "hidden": false,
+      "type": "button",
+      "label": "Register",
+      "fontFamily": "dm-sans",
+      "fontSize": 16,
+      "fontWeight": 700,
+      "textColor": "#2A1805",
+      "fill": "#FF9F1C",
+      "radius": 12
     }
   ]
 }

@@ -4,6 +4,7 @@ import { ElementView } from '@/components/elements/ElementView';
 import { Button } from '@/components/ui/button';
 import { ZOOM_MAX, ZOOM_MIN } from '@/lib/constants';
 import { displayHeight, rectOf, rectsIntersect, screenToDoc, type Rect } from '@/lib/geometry';
+import { hasContent } from '@/lib/submitButton';
 import { useDocStore } from '@/store/docStore';
 import { clampZoom, useUiStore } from '@/store/uiStore';
 import type { DocElement } from '@/types/doc';
@@ -297,7 +298,7 @@ export function Canvas() {
   );
 
   const cursor = panning ? 'grabbing' : spaceDown ? 'grab' : 'default';
-  const isEmpty = elements.length === 0;
+  const isEmpty = !hasContent({ elements });
 
   return (
     <div

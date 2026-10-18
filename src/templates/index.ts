@@ -1,8 +1,15 @@
 import { logError } from '@/lib/logError';
+import { normalizeDoc } from '@/lib/normalize';
 import { parseDoc } from '@/types/doc.schema';
 import type { FormDoc } from '@/types/doc';
+import customerFeedback from './customer-feedback.json';
 import contactForm from './contact-form.json';
 import eventRegistration from './event-registration.json';
+import jobApplication from './job-application.json';
+import lunchOrder from './lunch-order.json';
+import newsletterSignup from './newsletter-signup.json';
+import supportRequest from './support-request.json';
+import weddingRsvp from './wedding-rsvp.json';
 
 export interface Template {
   id: string;
@@ -24,6 +31,42 @@ const SOURCES: { id: string; name: string; description: string; json: unknown }[
     description: 'Tickets, diet, and a signature',
     json: eventRegistration,
   },
+  {
+    id: 'customer-feedback',
+    name: 'Customer feedback',
+    description: 'Rating, highlights, and comments',
+    json: customerFeedback,
+  },
+  {
+    id: 'newsletter-signup',
+    name: 'Newsletter sign-up',
+    description: 'A bold dark page with topics to pick',
+    json: newsletterSignup,
+  },
+  {
+    id: 'wedding-rsvp',
+    name: 'Wedding RSVP',
+    description: 'Elegant, with guests and diet',
+    json: weddingRsvp,
+  },
+  {
+    id: 'support-request',
+    name: 'Support request',
+    description: 'Priority, details, and a file upload',
+    json: supportRequest,
+  },
+  {
+    id: 'lunch-order',
+    name: 'Lunch order',
+    description: 'Pick a main, extras, and a time',
+    json: lunchOrder,
+  },
+  {
+    id: 'job-application',
+    name: 'Job application (A4)',
+    description: 'Two columns, CV upload, and a signature',
+    json: jobApplication,
+  },
 ];
 
 /** Every template is validated with the same schema as imports, so a bad one is skipped, not loaded. */
@@ -33,5 +76,13 @@ export const TEMPLATES: Template[] = SOURCES.flatMap((source) => {
     logError(`template ${source.id} is invalid`, result.errors);
     return [];
   }
-  return [{ id: source.id, name: source.name, description: source.description, doc: result.doc }];
+  // Normalizing here gives text its real height, so thumbnails match what the editor will show.
+  return [
+    {
+      id: source.id,
+      name: source.name,
+      description: source.description,
+      doc: normalizeDoc(result.doc),
+    },
+  ];
 });

@@ -105,10 +105,12 @@ test.describe('toolbar', () => {
   test('nothing selected shows page settings, with the grid toggle', async ({ page }) => {
     await startBuilder(page);
     await expect(page.getByRole('button', { name: /^Page color/ })).toBeVisible();
-    const grid = page.getByRole('button', { name: 'Layout grid snap lines' });
-    await expect(grid).toHaveAttribute('aria-pressed', 'true');
-    await grid.click();
+    const grid = page.getByRole('button', { name: /layout grid/i });
     await expect(grid).toHaveAttribute('aria-pressed', 'false');
+    await expect(page.getByTestId('grid-overlay')).toHaveCount(0);
+    await grid.click();
+    await expect(grid).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.getByTestId('grid-overlay')).toBeVisible();
   });
 });
 
@@ -139,7 +141,10 @@ test.describe('selection tools', () => {
     await startBuilder(page);
     await addFromRail(page, 'Elements', /^Rectangle/);
     await page.getByRole('button', { name: 'Layers' }).click();
-    const layers = page.getByRole('dialog', { name: 'Layers' });
+    const layers = page
+      .getByRole('dialog', { name: 'Layers' })
+      .getByRole('listitem')
+      .filter({ hasText: 'Rectangle' });
     await layers.getByRole('button', { name: 'Hide' }).click();
     await expect(elements(page).first()).toHaveCSS('opacity', '0.3');
     await layers.getByRole('button', { name: 'Show' }).click();
@@ -291,9 +296,10 @@ test.describe('limits and performance', () => {
     await expect(elements(page)).toHaveCount(100);
     await page.getByRole('button', { name: 'Elements', exact: true }).click();
     const card = page.getByRole('button', { name: /Thin divider/ });
-    for (let i = 0; i < 51; i += 1) await card.click();
+    for (let i = 0; i < 50; i += 1) await card.click();
     await expect(page.getByText('A form can have up to 150 elements.')).toBeVisible();
-    await expect(elements(page)).toHaveCount(150);
+    // 150 in total, and the submit button is one of them.
+    await expect(elements(page)).toHaveCount(149);
   });
 });
 

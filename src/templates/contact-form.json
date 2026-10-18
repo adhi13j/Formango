@@ -8,12 +8,7 @@
     "autoHeight": true,
     "background": "#FFFFFF",
     "outerBackground": "#FFF1D6",
-    "margin": 20,
-    "submit": {
-      "label": "Send",
-      "fill": "#FF9F1C",
-      "textColor": "#2A1805"
-    }
+    "margin": 20
   },
   "elements": [
     {
@@ -59,7 +54,7 @@
       "x": 20,
       "y": 152,
       "width": 350,
-      "height": 42,
+      "height": 63,
       "locked": false,
       "hidden": false,
       "type": "text",
@@ -77,7 +72,7 @@
       "id": "c-name",
       "name": "Name",
       "x": 20,
-      "y": 214,
+      "y": 238,
       "width": 350,
       "height": 72,
       "locked": false,
@@ -90,6 +85,8 @@
       "required": true,
       "validation": "none",
       "options": [],
+      "fileKinds": [],
+      "maxFileMb": 5,
       "labelStyle": {
         "fontFamily": "dm-sans",
         "fontSize": 14,
@@ -110,7 +107,7 @@
       "id": "c-email",
       "name": "Email",
       "x": 20,
-      "y": 302,
+      "y": 326,
       "width": 350,
       "height": 72,
       "locked": false,
@@ -123,6 +120,8 @@
       "required": true,
       "validation": "email",
       "options": [],
+      "fileKinds": [],
+      "maxFileMb": 5,
       "labelStyle": {
         "fontFamily": "dm-sans",
         "fontSize": 14,
@@ -143,7 +142,7 @@
       "id": "c-message",
       "name": "Message",
       "x": 20,
-      "y": 390,
+      "y": 414,
       "width": 350,
       "height": 150,
       "locked": false,
@@ -156,6 +155,8 @@
       "required": true,
       "validation": "none",
       "options": [],
+      "fileKinds": [],
+      "maxFileMb": 5,
       "labelStyle": {
         "fontFamily": "dm-sans",
         "fontSize": 14,
@@ -171,6 +172,24 @@
         "strokeWidth": 1,
         "radius": 8
       }
+    },
+    {
+      "id": "c-submit",
+      "name": "Submit button",
+      "x": 20,
+      "y": 596,
+      "width": 350,
+      "height": 48,
+      "locked": false,
+      "hidden": false,
+      "type": "button",
+      "label": "Send",
+      "fontFamily": "dm-sans",
+      "fontSize": 16,
+      "fontWeight": 700,
+      "textColor": "#2A1805",
+      "fill": "#FF9F1C",
+      "radius": 12
     }
   ]
 }

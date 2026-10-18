@@ -18,7 +18,11 @@ export async function addFromRail(page: Page, rail: string, card: RegExp | strin
   await page.getByRole('button', { name: 'Close panel' }).click();
 }
 
-export const elements = (page: Page): Locator => page.locator('[data-element-id]');
+/** Every element except the submit button, which every form has and most tests ignore. */
+export const elements = (page: Page): Locator =>
+  page.locator('[data-element-id]:not([data-element-type="button"])');
+
+export const submitButton = (page: Page): Locator => page.locator('[data-element-type="button"]');
 
 export interface Box {
   x: number;
