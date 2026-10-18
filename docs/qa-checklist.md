@@ -46,6 +46,7 @@ Test browsers: latest Chrome (main), Safari, Firefox. Desktop window sizes: 1280
 ### E. Editing text and fields
 - [ ] Double-click text edits in place. Esc, click-away, and Ctrl+Enter commit. Empty text becomes "Text".
 - [ ] After committing, line breaks match what you saw while editing (within one line).
+- [ ] Line breaks for the same text are identical in Chrome, Firefox, and Safari (text uses geometricPrecision, no kerning or ligatures).
 - [ ] Double-click a field label edits it. Required toggle adds a red asterisk.
 - [ ] Options editor: add, remove (cannot go below 1), reorder, rename, paste multiple lines, duplicates are removed, max 50.
 - [ ] Changing options on radio/checkbox updates the field height.

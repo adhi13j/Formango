@@ -162,7 +162,11 @@ const pairs = [
   ['Error text on error bg',       '--berry-700','--berry-100',4.5],
   ['Input border on white (UI)',   '--input',    '#FFFFFF',    3],
   ['Selection outline on mango-500','--selection','--mango-500',3],
-  ['Guide line on white',          '--guide',    '#FFFFFF',    3]
+  ['Guide line on white',          '--guide',    '#FFFFFF',    3],
+  ['Primary button (semantic tokens)','--primary-foreground','--primary',4.5],
+  ['Destructive button (semantic tokens)','--destructive-foreground','--destructive',4.5],
+  ['Muted text (semantic tokens)', '--muted-foreground','--background',4.5],
+  ['Accent text (semantic tokens)','--accent-foreground','--accent',4.5]
 ];
 const resolve = x => x.startsWith('--') ? v(x) : x;
 document.querySelector('#contrast tbody').innerHTML = pairs.map(([label,f,b,min]) => {

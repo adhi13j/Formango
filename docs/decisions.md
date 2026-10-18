@@ -29,3 +29,19 @@ Date, decision, reason. Newest at the bottom.
 - **Guest persistence storage: IndexedDB via `idb-keyval`** (owner agreed). Handles a 4 MB doc with images. localStorage stays only for small preferences such as recent colors.
 - **Past response snapshots: keep only the current published snapshot** (default adopted, owner asked for the simple option). Answers to fields removed in a later republish show as "removed field". Keeping every past version is out of scope.
 - **Public form fetch: expose only `id, slug, published_doc, form_rev` to anonymous visitors** (default adopted), through a view or RPC. Implemented and tested in Phase 3. No owner action needed.
+
+## 2026-10-18: Phase 0 font spike (task 0.5b) results
+
+Measured 112 samples (7 fonts x 2 weights x 2 sizes x 4 strings, including kerning pairs and ligature words) in headless Chrome on Linux, comparing DOM, canvas, and pdf-lib widths from the same TTFs.
+
+| Finding | Evidence |
+|---|---|
+| Chrome on Linux rounds every glyph advance to whole pixels by default, so DOM and canvas widths were up to 26px (about 4.6%) wider than the PDF on a 560px line | Poppins 700 16px: DOM 581px, PDF 555.14px |
+| Fix: `text-rendering: geometricPrecision` on all form text (CSS) and `ctx.textRendering = 'geometricPrecision'` when measuring | DOM then 555.14px, canvas 555.14px, PDF 555.136px |
+| Canvas cannot turn ligatures off (`fi`, `ffi`), so whole-string `measureText` differed from the DOM by up to 17.6px | Space Grotesk 28px "fi fl ffi ffl office" |
+| Fix: **measure the sum of per-character advances** (cache each character per font), never whole strings | Max difference 0.015px vs DOM and 0.004px vs PDF over all 112 samples |
+| Kerning and ligatures must be off in the DOM (`font-kerning: none; font-variant-ligatures: none`) and in the PDF (`embedFont(bytes, { features: { kern: false, liga: false, clig: false, calt: false } })`) | With kerning on, DOM vs PDF differed by up to 24px |
+| pdf-lib `embedFont(..., { subset: true })` keeps only the glyphs it has drawn (4 glyphs for "abc"). Characters typed later into a fillable field would not render | Subset font program 667 bytes vs 44,448 bytes for the full font |
+| Decision: filled PDFs may subset, fillable PDFs embed the full font (`subset: false`) | The extra size is about 45 KB per font |
+
+Consequences: `layoutText` (task 1.3) measures per-character advances with geometricPrecision, `.doc-text` sets all three CSS properties, and PDF export passes the feature flags. A cross-browser check (Chrome, Firefox, Safari) of line breaks is added to the Phase 1 QA, since other browsers may round differently.

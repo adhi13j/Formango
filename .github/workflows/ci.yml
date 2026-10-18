@@ -14,4 +14,5 @@ jobs:
           node-version: lts/*
           cache: npm
       - run: npm ci
+      - run: npx playwright install --with-deps chromium
       - run: npm run check

@@ -42,21 +42,21 @@ Sizes replace the old hour estimates, which were unrealistic (Moveable snapping 
   - **Details:** global styles: `html { height: 100% }`, `body { min-height: 100% }`, `-webkit-font-smoothing: antialiased`, `box-sizing: border-box` everywhere. Set the focus ring globally to 2px `--ring` with 2px offset.
   - **Done when:** a test page shows a mango `Button` with dark text, a cream card, and matches `theme-preview.html`.
 
-- [ ] **0.5 Fonts**
+- [x] **0.5 Fonts**
   - **Do:** get static font files for the 7 fonts in `spec.md` (weights 400 and 700) plus the UI weights (DM Sans 400, 500, 700; Poppins 600). Keep the TTFs in `public/fonts/ttf/` (used by the PDF exporter) and generate woff2 copies in `public/fonts/` (used by `@font-face`) with the license files in `public/fonts/licenses/`. Write `src/styles/fonts.css` with `@font-face` rules (woff2, `font-display: swap` for UI fonts). Create `src/lib/fonts.ts` exporting `FONTS: Record<FontId, { label, family, files: {400: {woff2, ttf}, 700: {woff2, ttf}} }>`, `loadFonts(ids)` (loads only the given fonts) and `loadAllFonts()` (builder) that call `document.fonts.load('400 16px "<family>"')` and the 700 variant, resolving when done (timeout 4s, never rejects). The fill page calls `loadFonts` with just the fonts the doc uses.
   - **Details:** do not use Google Fonts links. File names lowercase with hyphens. Set `font-kerning: none` and `font-variant-ligatures: none` globally for form content (see `spec.md`).
   - **Done when:** DevTools Network shows fonts served from your own origin, and `loadAllFonts()` resolves in the console.
 
-- [ ] **0.5b PDF text spike (about 1 hour, throwaway)**
+- [x] **0.5b PDF text spike (about 1 hour, throwaway)**
   - **Do:** in a scratch page, embed Poppins and Playfair TTFs with pdf-lib and fontkit, draw a few wrapped paragraphs (left, center, right) using line breaks from a canvas `measureText` with `fontKerning = 'none'`, and overlay the DOM rendering of the same text.
   - **Details:** check line widths, baselines, and that explicit alignment using `font.widthOfTextAtSize` agrees with the DOM within 1px per line. Also check that an AcroForm text field with a **subset** embedded font fails to show typed characters outside the subset, and that a full (non-subset) font works.
   - **Done when:** the result is written to `docs/decisions.md` (kerning setting that works, subset policy for fillable PDFs). If the match is worse than about 1px, change the plan before building 1.3. Delete the scratch code afterwards.
 
-- [ ] **0.6 Contrast check script**
+- [x] **0.6 Contrast check script**
   - **Do:** `scripts/check-contrast.ts` (run with `tsx` or node) that parses `src/styles/theme.css`, resolves the tokens, and checks the pairs listed in `docs/theme-preview.html` (same minimums). Exit code 1 and a readable table on failure. Wire to `npm run check:contrast` and include it in `npm run check`.
   - **Done when:** it passes now, and fails if you temporarily change `--primary-foreground` to white.
 
-- [ ] **0.7 Test setup**
+- [x] **0.7 Test setup**
   - **Do:** install Vitest, `@testing-library/react`, `@testing-library/jest-dom`, `jsdom`. Add `src/test/setup.ts`. Add one trivial passing test.
   - **Details:** canvas `measureText` does not exist in jsdom. Add a small mock in the setup (width = characters x 0.5 x font size) used only by tests.
   - **Done when:** `npm test` passes.
@@ -90,7 +90,7 @@ Goal: by the end, the owner can open `/builder`, design a form, undo and redo, p
   - **Done when:** tests cover each function including edge cases (zero-size, negative coordinates, 3 elements distribute).
 
 - [ ] **1.3 Text layout engine**
-  - **Do:** `src/lib/text/layoutText.ts`: `layoutText({ text, fontFamily, fontSize, fontWeight, maxWidth, lineHeight, maxLines? }) => { lines: string[]; height: number; lineHeightPx: number }` using a cached offscreen canvas `measureText` with the exact font string (`"700 28px Poppins"`) and `ctx.fontKerning = 'none'` (per the 0.5b spike). Also add the fonts-ready gate here (old task 1.7): the builder shows a skeleton until `loadAllFonts()` resolves (max 4s) so measurement is correct on first render.
+  - **Do:** `src/lib/text/layoutText.ts`: `layoutText({ text, fontFamily, fontSize, fontWeight, maxWidth, lineHeight, maxLines? }) => { lines: string[]; height: number; lineHeightPx: number }` using a cached offscreen canvas with the exact font string (`"700 28px Poppins"`), `ctx.textRendering = 'geometricPrecision'` and `ctx.fontKerning = 'none'`. **Measure the sum of per-character advances** (cache `measureText(char).width` per font and character), never a whole string, so ligatures cannot change widths (see the 0.5b results in `decisions.md`). Also add the fonts-ready gate here (old task 1.7): the builder shows a skeleton until `loadAllFonts()` resolves (max 4s) so measurement is correct on first render.
   - **Details:** preserve explicit `\n`. Break on spaces. A word longer than `maxWidth` breaks by character. Collapse trailing spaces on each line. Empty lines count. Cache by key to avoid re-measuring. Also export `fontMetrics(fontFamily, fontSize, weight)` returning `ascent` and `descent` from `fontBoundingBoxAscent/Descent` (fallback `0.8 / 0.2` times size). `height = lines.length * fontSize * lineHeight`.
   - **Why it matters:** the same line breaks are used by the editor, the fill page, and the PDF, so text never wraps differently between screen and PDF. **Render text as one div per line** (`white-space: pre`) using these lines.
   - **Done when:** tests (with the canvas mock) cover wrapping, long words, newlines, empty text, and caching.
@@ -241,7 +241,7 @@ Goal: by the end, the owner can open `/builder`, design a form, undo and redo, p
     - **Page size and scale:** A4 = 595.28 x 841.89 pt, `scale = 595.28 / page.width`. Mobile preset: page width 595.28 pt, height `displayHeight * scale`.
     - **Coordinates:** PDF origin is bottom-left. For an element, `pdfY = pageHeightPt - (el.y + el.height) * scale`. Centralize this in one `toPdfRect(el)` helper and test it.
     - **Colors:** `hexToRgb01()` helper. Opacity via the `opacity` and `borderOpacity` options.
-    - **Fonts:** fetch the TTFs once (cache the bytes), register `fontkit`, `embedFont(bytes, { subset: true })` for filled mode. In fillable mode embed the **full** font (`subset: false`) so characters typed later still render (confirmed by spike 0.5b). Cache embedded fonts per document.
+    - **Fonts:** fetch the TTFs once (cache the bytes), register `fontkit`, `embedFont(bytes, { subset: true, features: { kern: false, liga: false, clig: false, calt: false } })` for filled mode. In fillable mode embed the **full** font (`subset: false`) so characters typed later still render (confirmed by spike 0.5b). Cache embedded fonts per document.
     - **Missing glyphs:** wrap text encoding in try/catch, replace unsupported characters with `?`, and return a `warnings: string[]` list so the UI can tell the user.
   - **Done when:** a doc with only a page background and a rectangle exports a correct PDF whose rectangle lines up with the builder (check visually).
 
