@@ -1,8 +1,6 @@
 import { RotateCcw, Smartphone, Monitor, X } from 'lucide-react';
-import { useState } from 'react';
-import type { AnswerValue } from '@/components/elements/types';
 import { Button } from '@/components/ui/button';
-import { FormView } from '@/features/fill/FormView';
+import { FillForm } from '@/features/fill/FillForm';
 import { useDocStore } from '@/store/docStore';
 import { useUiStore } from '@/store/uiStore';
 
@@ -43,38 +41,27 @@ export function PreviewBar({ onReset }: { onReset: () => void }) {
   );
 }
 
-export function usePreviewAnswers() {
-  const [answers, setAnswers] = useState<Record<string, AnswerValue>>({});
-  const onAnswer = (id: string, value: AnswerValue | undefined) =>
-    setAnswers((current) => {
-      const next = { ...current };
-      if (value === undefined) delete next[id];
-      else next[id] = value;
-      return next;
-    });
-  return { answers, onAnswer, reset: () => setAnswers({}) };
-}
-
-export function PreviewView({
-  answers,
-  onAnswer,
-}: {
-  answers: Record<string, AnswerValue>;
-  onAnswer: (id: string, value: AnswerValue | undefined) => void;
-}) {
+/**
+ * The respondent's view inside the builder. It is the real fill form, so validation, the success
+ * screen and everything else behave exactly as they will for a respondent, but nothing is saved.
+ * Desktop and phone share one tree shape so switching device keeps the answers typed so far.
+ */
+export function PreviewView() {
   const doc = useDocStore((s) => s.doc);
   const device = useUiStore((s) => s.previewDevice);
-  if (device === 'phone') {
-    return (
-      <div className="flex h-full justify-center overflow-auto bg-workspace p-6">
-        <div
-          data-testid="phone-frame"
-          className="h-full max-h-[844px] w-[390px] flex-none overflow-hidden rounded-[32px] border-8 border-ink-900 bg-card shadow-lg"
-        >
-          <FormView doc={doc} mode="preview" answers={answers} onAnswer={onAnswer} />
-        </div>
+  const phone = device === 'phone';
+  return (
+    <div className={phone ? 'flex h-full justify-center overflow-auto bg-workspace p-6' : 'h-full'}>
+      <div
+        data-testid={phone ? 'phone-frame' : undefined}
+        className={
+          phone
+            ? 'h-full max-h-[844px] w-[390px] flex-none overflow-hidden rounded-[32px] border-8 border-ink-900 bg-card shadow-lg'
+            : 'h-full'
+        }
+      >
+        <FillForm doc={doc} repo={null} />
       </div>
-    );
-  }
-  return <FormView doc={doc} mode="preview" answers={answers} onAnswer={onAnswer} />;
+    </div>
+  );
 }

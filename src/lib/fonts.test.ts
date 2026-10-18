@@ -48,3 +48,21 @@ describe('fonts', () => {
     await expect(done).resolves.toBeUndefined();
   });
 });
+
+describe('fontsUsedBy', () => {
+  it('lists only the fonts a form uses, adding the handwriting font for signatures', async () => {
+    const { createElement } = await import('@/lib/elements');
+    const { createBlankDoc } = await import('@/types/doc.schema');
+    const { fontsUsedBy } = await import('./fonts');
+    const doc = createBlankDoc('mobile');
+    expect(fontsUsedBy({ elements: [] })).toEqual([]);
+    const withText = {
+      elements: [{ ...createElement('heading', doc), fontFamily: 'playfair' as const }],
+    };
+    expect(fontsUsedBy(withText)).toEqual(['playfair']);
+    expect(fontsUsedBy({ elements: [createElement('field-signature', doc)] })).toEqual([
+      'dm-sans',
+      'caveat',
+    ]);
+  });
+});

@@ -13,7 +13,7 @@ import { Canvas } from './Canvas';
 import { ChooseSizeDialog } from './dialogs/ChooseSizeDialog';
 import { ShortcutsDialog } from './dialogs/ShortcutsDialog';
 import { Flyout } from './Flyout';
-import { PreviewBar, PreviewView, usePreviewAnswers } from './PreviewView';
+import { PreviewBar, PreviewView } from './PreviewView';
 import { Rail } from './Rail';
 import { SelectionAnnouncer } from './SelectionAnnouncer';
 import { ContextualToolbar } from './toolbar/ContextualToolbar';
@@ -39,7 +39,8 @@ function BuilderShell() {
   const [fontsReady, setFontsReady] = useState(false);
   const mode = useUiStore((s) => s.mode);
   useEditorShortcuts();
-  const preview = usePreviewAnswers();
+  // Changing the key starts a fresh preview (Reset answers).
+  const [previewRun, setPreviewRun] = useState(0);
 
   useEffect(() => startStoreSync(), []);
   useEffect(() => {
@@ -52,17 +53,17 @@ function BuilderShell() {
     <div className="grid h-screen grid-cols-[minmax(0,1fr)] grid-rows-[auto_auto_minmax(0,1fr)_auto] bg-background">
       <TopBar />
       <Banners />
-      {mode === 'edit' ? <ContextualToolbar /> : <PreviewBar onReset={preview.reset} />}
+      {mode === 'edit' ? (
+        <ContextualToolbar />
+      ) : (
+        <PreviewBar onReset={() => setPreviewRun((n) => n + 1)} />
+      )}
       <div className="flex min-h-0">
         {mode === 'edit' && <Rail />}
         <main className="relative min-w-0 flex-1">
           {loaded ? (
             <ErrorBoundary>
-              {mode === 'edit' ? (
-                <Canvas />
-              ) : (
-                <PreviewView answers={preview.answers} onAnswer={preview.onAnswer} />
-              )}
+              {mode === 'edit' ? <Canvas /> : <PreviewView key={previewRun} />}
             </ErrorBoundary>
           ) : (
             <div

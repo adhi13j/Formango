@@ -1,3 +1,5 @@
+import type { DocElement } from '@/types/doc';
+
 export const FONT_IDS = [
   'dm-sans',
   'inter',
@@ -67,4 +69,19 @@ export async function loadFonts(ids: readonly FontId[]): Promise<void> {
 /** Builder: load every document font before the first text measurement. */
 export function loadAllFonts(): Promise<void> {
   return loadFonts(FONT_IDS);
+}
+
+/** Just the fonts a form uses, so the fill page does not download all fourteen files. */
+export function fontsUsedBy(doc: { elements: readonly DocElement[] }): FontId[] {
+  const used = new Set<FontId>();
+  for (const el of doc.elements) {
+    if (el.type === 'text' || el.type === 'button') used.add(el.fontFamily);
+    if (el.type === 'field') {
+      used.add(el.labelStyle.fontFamily);
+      used.add(el.inputStyle.fontFamily);
+      // The signature pad can type a name in the handwriting font.
+      if (el.fieldType === 'signature') used.add('caveat');
+    }
+  }
+  return FONT_IDS.filter((id) => used.has(id));
 }

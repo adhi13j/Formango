@@ -13,6 +13,12 @@ const routes: RouteObject[] = [
     errorElement: <RouteError />,
     hydrateFallbackElement: <RouteLoading />,
   },
+  {
+    path: '/fill/local',
+    lazy: async () => ({ Component: (await import('@/pages/FillLocal')).default }),
+    errorElement: <RouteError />,
+    hydrateFallbackElement: <RouteLoading />,
+  },
   { path: '*', element: <NotFound /> },
 ];
 

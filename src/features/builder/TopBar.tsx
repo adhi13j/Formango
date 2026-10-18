@@ -166,6 +166,11 @@ export function TopBar() {
             <DropdownMenuItem onSelect={() => fileInput.current?.click()}>
               Import JSON
             </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <a href="/fill/local" target="_blank" rel="noopener">
+                Open fill page in a new tab
+              </a>
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onSelect={() => useUiStore.getState().setShortcutsOpen(true)}>
               Keyboard shortcuts

@@ -224,7 +224,7 @@ Goal: by the end, the owner can open `/builder`, design a form, undo and redo, p
   - **Details:** messages are short and human ("Enter a valid email", "This field is required"). Hidden fields are skipped. Trim whitespace before validating.
   - **Done when:** tests cover every field type and rule.
 
-- [ ] **2.2 Fill page component**
+- [x] **2.2 Fill page component**
   - **Do:** `src/features/fill/FillForm.tsx` renders Page view or List view (from `layout.md`) based on preset and viewport width (A4 + width under 640 = List view). Reuse `ElementView` in `fill` mode. Keep answers in local state keyed by element id.
   - **Details:** Page view of a Mobile form on a phone scales to the screen width, clamped 0.85 to 1.15 (`layout.md`). A4 Page view scales down to fit a narrow window (never up). Load only the fonts the doc uses (`loadFonts`). The Submit button is an element (`ButtonView`, already built; pass `onSubmit`). List view sorts by `y` then `x`, skips shapes and lines, and ends with the Submit button. Validate on blur, then on change after the first error, and on submit; focus and scroll to the first error. Honeypot input (visually hidden, `tabindex=-1`, `autocomplete=off`), and block submission faster than 2 seconds after mount. Success screen with "Download my copy (PDF)" and "Submit another response".
   - **Done when:** the form works with keyboard only and on a 390px wide viewport with no horizontal scroll.
@@ -234,7 +234,7 @@ Goal: by the end, the owner can open `/builder`, design a form, undo and redo, p
   - **Details:** every route ends as one PNG data URL: logical size 400 x 150, cropped to the ink bounds with 8px padding and re-scaled so output stays under about 60 KB (uploads are drawn onto the same canvas, fitted and centered). Track `hasInk` so an empty pad counts as no answer. The field shows the signature with a green border once signed, and a "Change signature" button.
   - **Done when:** drawing is smooth on mouse and touch, Clear works, typing and uploading produce a signature, and the answer is a valid PNG data URL under the size limit.
 
-- [ ] **2.4 Local submit stub**
+- [x] **2.4 Local submit stub**
   - **Do:** for now, "Submit" saves to `localStorage['formango:builder:responses:v1']` as `{ id, createdAt, answers }[]` through a `ResponsesRepo` interface (`create`, `list`). Phase 3 swaps the implementation to Supabase without touching the UI.
   - **Done when:** submitting twice stores two entries and they survive a reload.
 
