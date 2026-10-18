@@ -85,7 +85,7 @@ Goal: by the end, the owner can open `/builder`, design a form, undo and redo, p
   - **Details:** constants in `src/lib/constants.ts`: page presets, element defaults table, min sizes (width 80, text min width 40, field min height per `schema.md`), max elements 150, snap threshold 6, zoom range 0.25 to 3, default palette from `theme.md`.
   - **Done when:** unit tests: blank doc validates, a doc with an unknown element type fails, `migrate` returns a valid doc for version 1.
 
-- [ ] **1.2 Geometry helpers (pure functions, fully tested)**
+- [x] **1.2 Geometry helpers (pure functions, fully tested)**
   - **Do:** `src/lib/geometry.ts`: `clamp`, `rectOf(el)`, `rectsIntersect`, `unionRect`, `clampToPage(el, page, displayHeight)`, `displayHeight(doc)`, `screenToDoc(point, containerRect, zoom, scroll)`, `snapToGrid`, `alignElements(els, mode)`, `distributeElements(els, axis)`.
   - **Done when:** tests cover each function including edge cases (zero-size, negative coordinates, 3 elements distribute).
 
