@@ -5,6 +5,7 @@ import type { FormDoc } from '@/types/doc';
 import customerFeedback from './customer-feedback.json';
 import contactForm from './contact-form.json';
 import eventRegistration from './event-registration.json';
+import insuranceProposal from './insurance-proposal.json';
 import jobApplication from './job-application.json';
 import lunchOrder from './lunch-order.json';
 import newsletterSignup from './newsletter-signup.json';
@@ -60,6 +61,12 @@ const SOURCES: { id: string; name: string; description: string; json: unknown }[
     name: 'Lunch order',
     description: 'Pick a main, extras, and a time',
     json: lunchOrder,
+  },
+  {
+    id: 'insurance-proposal',
+    name: 'Insurance proposal info',
+    description: 'Details a Development Officer needs for ANANDA',
+    json: insuranceProposal,
   },
   {
     id: 'job-application',

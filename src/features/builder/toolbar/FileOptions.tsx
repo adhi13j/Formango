@@ -10,8 +10,12 @@ import { NumberField } from './kit';
 
 /** Which file types a file-upload field accepts, and the largest file size. */
 export function FileOptions({ el }: { el: FieldElement }) {
-  const update = (patch: Partial<FieldElement>) =>
-    useDocStore.getState().updateElement(el.id, patch);
+  const update = (patch: Partial<FieldElement>) => {
+    // The placeholder starts as the rules text. While it still is that text, keep it in step.
+    const stale = el.placeholder === describeFileRules(el);
+    const next = describeFileRules({ ...el, ...patch });
+    useDocStore.getState().updateElement(el.id, stale ? { ...patch, placeholder: next } : patch);
+  };
   const chosen = el.fileKinds.length > 0 ? el.fileKinds : FILE_KIND_IDS;
   const toggle = (kind: FileKind, on: boolean) => {
     const next = on ? [...chosen, kind] : chosen.filter((k) => k !== kind);

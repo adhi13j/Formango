@@ -1,5 +1,6 @@
 import { nanoid } from 'nanoid';
 import { COLORS, DEFAULT_FILE_MB, DEFAULT_FONT, PRESETS } from '@/lib/constants';
+import { describeFileRules } from '@/lib/fileTypes';
 import { optionListHeight } from '@/lib/fields';
 import { slugify, uniqueSlug } from '@/lib/slug';
 import type {
@@ -115,7 +116,10 @@ function fieldElement(
     fieldType,
     key: uniqueSlug(slugify(label, 'field'), taken),
     label,
-    placeholder: '',
+    placeholder:
+      fieldType === 'file'
+        ? describeFileRules({ fileKinds: ['image', 'pdf'], maxFileMb: DEFAULT_FILE_MB })
+        : '',
     required: false,
     validation: 'none',
     options,

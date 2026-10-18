@@ -273,7 +273,7 @@
       "fieldType": "file",
       "key": "screenshot",
       "label": "Screenshot or document",
-      "placeholder": "",
+      "placeholder": "Images, PDF up to 10 MB",
       "required": false,
       "validation": "none",
       "options": [],

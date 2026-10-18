@@ -228,9 +228,10 @@ async function drawChoices(ctx: PdfContext, el: FieldElement, selected: string[]
   }
 }
 
-async function drawMutedHint(ctx: PdfContext, el: FieldElement, text: string): Promise<void> {
+async function drawMutedHint(ctx: PdfContext, el: FieldElement, full: string): Promise<void> {
   const s = el.inputStyle;
   const box = boxRect(el);
+  const text = truncateToWidth(full, s.fontFamily, s.fontSize, 400, box.width - FIELD_PAD_X * 2);
   const width = measureText(text, s.fontFamily, s.fontSize, 400);
   await drawRun(ctx, {
     text,

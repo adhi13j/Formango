@@ -32,6 +32,9 @@ describe('file rules', () => {
 
   it('describes the rules in plain words', () => {
     expect(describeFileRules({ fileKinds: ['pdf'], maxFileMb: 5 })).toBe('PDF up to 5 MB');
+    expect(describeFileRules({ fileKinds: ['image', 'pdf'], maxFileMb: 10 })).toBe(
+      'Images, PDF up to 10 MB',
+    );
     expect(describeFileRules({ fileKinds: [], maxFileMb: 5 })).toBe(
       'Images, PDF, Documents, Spreadsheets up to 5 MB',
     );

@@ -54,6 +54,20 @@ test.describe('filled boxes turn green', () => {
 });
 
 test.describe('file upload field', () => {
+  test('starts with the allowed types and size as an editable placeholder, shown once', async ({
+    page,
+  }) => {
+    await startBuilder(page);
+    await addFromRail(page, 'Fields', /File upload/);
+    await expect(page.getByText('Images, PDF up to 5 MB')).toHaveCount(1);
+    await page.getByRole('button', { name: 'Placeholder' }).click();
+    await page.locator('#placeholder-text').fill('');
+    await page.locator('#placeholder-text').press('Enter');
+    await page.keyboard.press('Escape');
+    await expect(page.getByText('Images, PDF up to 5 MB')).toHaveCount(0);
+    await expect(page.getByText('Choose a file')).toBeVisible();
+  });
+
   test('accepts an allowed file, shows its name, and can remove it', async ({ page }) => {
     await startBuilder(page);
     await addFromRail(page, 'Fields', /File upload/);

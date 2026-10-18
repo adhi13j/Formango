@@ -34,11 +34,10 @@ export function acceptAttribute(rules: FileRules): string {
     .join(',');
 }
 
-/** "PNG, JPG, PDF up to 5 MB", shown under the upload button. */
+/** "Images, PDF up to 5 MB". Short on purpose: it is the file box's starting placeholder. */
 export function describeFileRules(rules: FileRules): string {
-  const names = allowedExtensions(rules).map((ext) => ext.toUpperCase());
-  const shown = names.length > 6 ? kindsOf(rules).map((k) => FILE_KINDS[k].label) : names;
-  return `${shown.join(', ')} up to ${rules.maxFileMb || DEFAULT_FILE_MB} MB`;
+  const names = kindsOf(rules).map((kind) => FILE_KINDS[kind].label);
+  return `${names.join(', ')} up to ${rules.maxFileMb || DEFAULT_FILE_MB} MB`;
 }
 
 export function formatBytes(bytes: number): string {

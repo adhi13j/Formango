@@ -12,6 +12,7 @@ const IDS = [
   'wedding-rsvp',
   'support-request',
   'lunch-order',
+  'insurance-proposal',
   'job-application',
 ];
 

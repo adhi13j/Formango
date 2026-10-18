@@ -1,7 +1,7 @@
 import { Calendar, Check, ChevronDown, FileText, Upload, X } from 'lucide-react';
 import { useRef, useState, type CSSProperties } from 'react';
 import { FIELD_MARK_GAP, FIELD_MARK_SIZE, FIELD_PAD_X, FIELD_ROW_HEIGHT } from '@/lib/constants';
-import { acceptAttribute, checkFile, describeFileRules, formatBytes } from '@/lib/fileTypes';
+import { acceptAttribute, checkFile, formatBytes } from '@/lib/fileTypes';
 import { getAnswerFile, setAnswerFile } from '@/lib/fileAnswers';
 import { FONTS } from '@/lib/fonts';
 import { truncateToWidth } from '@/lib/text/layoutText';
@@ -69,13 +69,10 @@ function EditBox({ el }: { el: FieldElement }) {
       {isSignature ? (
         <Placeholder>Draw, type, or upload your signature</Placeholder>
       ) : isFile ? (
-        <>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 8, opacity: 0.8 }}>
-            <Upload size={16} aria-hidden="true" style={{ flex: 'none' }} />
-            <Placeholder>{el.placeholder || 'Choose a file'}</Placeholder>
-          </span>
-          <Placeholder>{describeFileRules(el)}</Placeholder>
-        </>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+          <Upload size={16} aria-hidden="true" style={{ flex: 'none', opacity: 0.8 }} />
+          <Placeholder>{el.placeholder || 'Choose a file'}</Placeholder>
+        </span>
       ) : (
         <Placeholder>{hint}</Placeholder>
       )}
@@ -375,11 +372,6 @@ function FileControl({ el, inputId, value, error, describedBy, onChange }: Input
               }}
             >
               {el.placeholder || 'Choose a file'}
-            </span>
-            <span
-              style={{ opacity: 0.6, fontSize: Math.max(12, s.fontSize - 3), whiteSpace: 'nowrap' }}
-            >
-              {describeFileRules(el)}
             </span>
           </label>
         )}

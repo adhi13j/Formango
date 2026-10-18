@@ -33,9 +33,11 @@ const text = (id, name, t, x, y, w, o = {}) => {
 
 const HEIGHTS = { text: 72, date: 72, dropdown: 72, longtext: 140, signature: 144, file: 96 };
 const rows = (n) => 24 + 32 * n;
+const KIND_LABELS = { image: 'Images', pdf: 'PDF', document: 'Documents', spreadsheet: 'Spreadsheets' };
+const fileHint = (o) => `${(o.fileKinds?.length ? o.fileKinds : Object.keys(KIND_LABELS)).map((k) => KIND_LABELS[k]).join(', ')} up to ${o.maxFileMb ?? 5} MB`;
 const field = (id, key, fieldType, label, x, y, w, o = {}) => ({
   ...base(id, o.name ?? label, x, y, w, o.height ?? (['radio', 'checkbox'].includes(fieldType) ? rows((o.options ?? []).length) : HEIGHTS[fieldType])),
-  type: 'field', fieldType, key, label, placeholder: o.placeholder ?? '', required: o.required ?? false,
+  type: 'field', fieldType, key, label, placeholder: o.placeholder ?? (fieldType === 'file' ? fileHint(o) : ''), required: o.required ?? false,
   validation: o.validation ?? 'none', options: o.options ?? [],
   fileKinds: o.fileKinds ?? [], maxFileMb: o.maxFileMb ?? 5,
   labelStyle: { fontFamily: o.labelFont ?? 'dm-sans', fontSize: 14, fontWeight: 700, color: o.labelColor ?? C.ink },
@@ -181,6 +183,91 @@ const job = doc('Job application', a4({ outer: '#E8DCC4' }), [
   text('j-fine', 'Fine print', 'By applying you agree that we may contact you about this role.', 40, 1048, 440, { size: 12, color: C.muted }),
 ]);
 
+
+// ---- Insurance proposal information sheet (for a Development Officer to key in) ------------------
+const proposal = (() => {
+  const els = [];
+  const L = 20, W = 350, HALF = 170, R = 200;
+  let y = 0;
+  const f = (...args) => els.push(field(...args));
+  const advance = (h, gap = 16) => { const top = y; y += h + gap; return top; };
+  const section = (id, title, hint) => {
+    els.push(line(`${id}-rule`, 'Divider', L, advance(2, 14), W, { color: C.divider, thickness: 1 }));
+    els.push(text(`${id}-h`, title, title, L, advance(26, hint ? 4 : 14), W, { role: 'heading', font: 'space-grotesk', size: 20, weight: 700 }));
+    if (hint) els.push(text(`${id}-t`, `${title} note`, hint, L, advance(guessHeight(hint, W, 14, 1.3), 14), W, { size: 14, color: C.muted }));
+  };
+  const heightOf = (type, o) => o.height ?? (['radio', 'checkbox'].includes(type) ? rows((o.options ?? []).length) : HEIGHTS[type] ?? 72);
+  const one = (id, key, type, label, o = {}) => {
+    const h = heightOf(type, o);
+    f(id, key, type, label, L, advance(h), W, { labelFont: 'space-grotesk', inputFont: 'space-grotesk', ...o, height: h });
+  };
+  const pair = (a, b) => {
+    const h = Math.max(heightOf(a[2], a[4] ?? {}), heightOf(b[2], b[4] ?? {}));
+    const top = advance(h);
+    const look = { labelFont: 'space-grotesk', inputFont: 'space-grotesk' };
+    f(a[0], a[1], a[2], a[3], L, top, HALF, { ...look, ...a[4], height: heightOf(a[2], a[4] ?? {}) });
+    f(b[0], b[1], b[2], b[3], R, top, HALF, { ...look, ...b[4], height: heightOf(b[2], b[4] ?? {}) });
+  };
+
+  y = 0;
+  els.push(rect('p-band', 'Header band', 0, 0, 390, 196, { fill: C.teal }));
+  els.push(circle('p-dot', 'Decoration', 300, 24, 70, { fill: C.white, opacity: 0.18 }));
+  els.push(text('p-title', 'Title', 'Insurance proposal: information sheet', L, 40, 300, { role: 'heading', font: 'space-grotesk', size: 26, weight: 700, color: C.white, lh: 1.2 }));
+  els.push(text('p-sub', 'Subtitle', 'Give these details to your Development Officer. They will enter them on the ANANDA proposal screens. Nothing here is submitted to an insurer.', L, 118, 340, { size: 14, color: C.white }));
+  y = 220;
+
+  section('a', 'Development Officer', 'Filled in by your officer, or leave blank.');
+  pair(['a-name', 'do-name', 'text', 'Officer name', { name: 'Officer name' }], ['a-code', 'do-code', 'text', 'Agency code', { name: 'Agency code' }]);
+
+  section('b', '1. Your details', 'Write names exactly as they appear on your ID.');
+  one('b-name', 'full-name', 'text', 'Full name', { required: true });
+  one('b-father', 'father-or-spouse', 'text', "Father's or spouse's name", { required: true });
+  pair(['b-dob', 'dob', 'date', 'Date of birth', { required: true }], ['b-gender', 'marital', 'dropdown', 'Marital status', { options: ['Single', 'Married', 'Widowed', 'Divorced'], required: true }]);
+  one('b-sex', 'gender', 'radio', 'Gender', { required: true, options: ['Female', 'Male', 'Other'] });
+  pair(['b-mobile', 'mobile', 'text', 'Mobile number', { required: true, validation: 'phone' }], ['b-email', 'email', 'text', 'Email', { validation: 'email' }]);
+  one('b-addr', 'address', 'longtext', 'Full postal address', { required: true, height: 110 });
+  pair(['b-pin', 'pin-code', 'text', 'PIN code', { required: true, validation: 'number' }], ['b-city', 'city', 'text', 'City or town', { required: true }]);
+
+  section('c', '2. Identity', 'Upload clear photos or scans. Aadhaar, PAN, or passport are usual.');
+  pair(['c-pan', 'pan', 'text', 'PAN', { name: 'PAN' }], ['c-aadhaar', 'aadhaar-last-4', 'text', 'Aadhaar (last 4 digits)', { validation: 'number' }]);
+  one('c-id', 'id-proof', 'file', 'ID proof', { required: true, fileKinds: ['image', 'pdf'], maxFileMb: 5 });
+  one('c-addr', 'address-proof', 'file', 'Address proof', { required: true, fileKinds: ['image', 'pdf'], maxFileMb: 5 });
+  one('c-photo', 'photo', 'file', 'Passport-size photo', { required: true, fileKinds: ['image'], maxFileMb: 2 });
+
+  section('d', '3. Work and income');
+  pair(['d-job', 'occupation', 'text', 'Occupation', { required: true }], ['d-edu', 'education', 'dropdown', 'Education', { options: ['Below 10th', '10th or 12th', 'Graduate', 'Postgraduate', 'Other'] }]);
+  pair(['d-inc', 'annual-income', 'text', 'Yearly income (Rs)', { required: true, validation: 'number' }], ['d-emp', 'employer', 'text', 'Employer or business']);
+  one('d-proof', 'income-proof', 'file', 'Income proof (optional)', { fileKinds: ['image', 'pdf', 'spreadsheet'], maxFileMb: 5 });
+
+  section('e', '4. The cover you want');
+  one('e-plan', 'plan', 'text', 'Plan name or number (if you know it)', { placeholder: 'Or write "advise me"' });
+  pair(['e-sum', 'sum-assured', 'text', 'Cover amount (Rs)', { required: true, validation: 'number' }], ['e-term', 'term-years', 'text', 'Policy term (years)', { validation: 'number' }]);
+  one('e-mode', 'premium-mode', 'radio', 'How will you pay?', { required: true, options: ['Yearly', 'Half-yearly', 'Quarterly', 'Monthly'] });
+  one('e-existing', 'existing-cover', 'text', 'Existing life policies (insurer and cover)', { placeholder: 'Write "none" if none' });
+
+  section('f', '5. Nominee', 'Who receives the benefit.');
+  pair(['f-name', 'nominee-name', 'text', 'Nominee name', { required: true }], ['f-rel', 'nominee-relationship', 'text', 'Relationship', { required: true }]);
+  pair(['f-dob', 'nominee-dob', 'date', 'Nominee date of birth', { required: true }], ['f-share', 'nominee-share', 'text', 'Share (%)', { validation: 'number' }]);
+
+  section('g', '6. Health', 'Honest answers keep claims simple later.');
+  pair(['g-height', 'height-cm', 'text', 'Height (cm)', { validation: 'number' }], ['g-weight', 'weight-kg', 'text', 'Weight (kg)', { validation: 'number' }]);
+  one('g-tob', 'tobacco', 'radio', 'Do you use tobacco or alcohol?', { required: true, options: ['No', 'Tobacco', 'Alcohol', 'Both'] });
+  one('g-cond', 'conditions', 'checkbox', 'Any of these now or before?', { options: ['Diabetes', 'High blood pressure', 'Heart condition', 'Cancer', 'Surgery in last 5 years', 'None of these'] });
+  one('g-note', 'health-notes', 'longtext', 'Details, medicines, or hospital stays', { height: 100 });
+
+  section('h', '7. Premium payment');
+  pair(['h-bank', 'bank-name', 'text', 'Bank name', {}], ['h-ifsc', 'ifsc', 'text', 'IFSC code', {}]);
+  one('h-cheque', 'cancelled-cheque', 'file', 'Cancelled cheque or passbook page', { fileKinds: ['image', 'pdf'], maxFileMb: 5 });
+
+  section('i', '8. Your confirmation');
+  one('i-ok', 'declaration', 'checkbox', 'Declaration', { required: true, options: ['I confirm these details are true'], height: 56 });
+  one('i-sign', 'signature', 'signature', 'Signature', { required: true });
+  one('i-date', 'date-signed', 'date', 'Date', { required: true });
+  
+  els.push(button('p-submit', 'Send to my officer', L, y, W, { fill: C.ink, text: C.white, font: 'space-grotesk' }));
+  return doc('Insurance proposal information', mobile({ outer: '#D5ECEC' }), els);
+})();
+
 const out = {
   'contact-form': contact,
   'event-registration': event,
@@ -190,6 +277,7 @@ const out = {
   'support-request': support,
   'lunch-order': lunch,
   'job-application': job,
+  'insurance-proposal': proposal,
 };
 for (const [name, value] of Object.entries(out)) {
   writeFileSync(new URL(`../src/templates/${name}.json`, import.meta.url), JSON.stringify(value, null, 2) + '\n');

@@ -278,7 +278,7 @@ Goal: by the end, the owner can open `/builder`, design a form, undo and redo, p
   - **Details:** file name `<title-slug>-<YYYY-MM-DD>.pdf` (slug: lowercase, hyphens, ASCII, fallback `form`).
   - **Done when:** both downloads work on desktop Chrome and iOS Safari, and the main bundle does not contain pdf-lib (check the build output).
 
-- [ ] **2.10 Phase 2 checkpoint (STOP)**
+- [x] **2.10 Phase 2 checkpoint (STOP)**
   - **Do:** run `qa-checklist.md` section "Phase 2". Commit. Handoff note with screenshots of the builder, fill page on desktop and phone width, and sample PDFs.
 
 ---

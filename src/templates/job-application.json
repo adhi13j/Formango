@@ -431,7 +431,7 @@
       "fieldType": "file",
       "key": "cv",
       "label": "Your CV",
-      "placeholder": "",
+      "placeholder": "PDF, Documents up to 5 MB",
       "required": true,
       "validation": "none",
       "options": [],
