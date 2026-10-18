@@ -85,6 +85,7 @@
   --warning: var(--sun-700);
   --warning-bg: var(--sun-100);
   --danger-bg: var(--berry-100);
+  --error: var(--berry-700);                 /* error text on light backgrounds */
 
   --border: #F0E3CF;
   --border-strong: var(--cream-400);
@@ -154,6 +155,7 @@
   --color-workspace: var(--workspace);
   --color-success: var(--success);
   --color-warning: var(--warning);
+  --color-error: var(--error);
 
   --radius-lg: var(--radius);
   --radius-md: var(--radius-control);

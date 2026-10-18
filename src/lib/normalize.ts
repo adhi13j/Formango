@@ -96,6 +96,26 @@ export function normalizeElement(el: DocElement, page: PageSettings): DocElement
   return shallowEqual(el, next) ? el : next;
 }
 
+/** Smallest size an element may be resized to. */
+export function minSizeOf(el: DocElement): { width: number; height: number } {
+  switch (el.type) {
+    case 'text':
+      return { width: MIN_TEXT_WIDTH, height: Math.ceil(el.fontSize * el.lineHeight) };
+    case 'shape':
+      return { width: MIN_SHAPE_SIZE, height: MIN_SHAPE_SIZE };
+    case 'image':
+      return { width: MIN_IMAGE_SIZE, height: MIN_IMAGE_SIZE };
+    case 'line':
+      return { width: MIN_LINE_WIDTH, height: el.thickness };
+    case 'field':
+      return { width: MIN_WIDTH, height: minFieldHeight(el) };
+    default: {
+      const unreachable: never = el;
+      return unreachable;
+    }
+  }
+}
+
 /** Normalizes every element and caps the count. Returns the same doc when nothing changed. */
 export function normalizeDoc(doc: FormDoc): FormDoc {
   let changed = false;

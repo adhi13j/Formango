@@ -33,3 +33,38 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* Radio and checkbox options in form content: a real, visually hidden input drives a drawn mark. */
+.fm-choice-input {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.fm-choice-input:focus-visible + .fm-choice-mark {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Selection chrome from react-moveable, recolored with the theme's selection color. */
+.fm-moveable.moveable-control-box {
+  --moveable-color: var(--selection);
+}
+
+.fm-moveable .moveable-control {
+  width: 10px;
+  height: 10px;
+  margin-top: -5px;
+  margin-left: -5px;
+  background: var(--card);
+  border: 2px solid var(--selection);
+}
+
+.fm-moveable .moveable-line {
+  background: var(--selection);
+}
