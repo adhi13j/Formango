@@ -190,14 +190,17 @@ async function drawChoices(ctx: PdfContext, el: FieldElement, selected: string[]
     const rowTop = top + index * FIELD_ROW_HEIGHT;
     const markTop = rowTop + (FIELD_ROW_HEIGHT - FIELD_MARK_SIZE) / 2;
     const rect = { x: el.x, y: markTop, width: FIELD_MARK_SIZE, height: FIELD_MARK_SIZE };
-    drawBox(ctx, {
-      rect,
-      fill: s.fill,
-      stroke: s.stroke,
-      strokeWidth: markBorder,
-      radius: kind === 'radio' ? FIELD_MARK_SIZE / 2 : 4,
-      ellipse: kind === 'radio',
-    });
+    // In fillable PDFs the form widget draws its own mark (a square, since widgets cannot round).
+    if (ctx.mode === 'filled') {
+      drawBox(ctx, {
+        rect,
+        fill: s.fill,
+        stroke: s.stroke,
+        strokeWidth: markBorder,
+        radius: kind === 'radio' ? FIELD_MARK_SIZE / 2 : 4,
+        ellipse: kind === 'radio',
+      });
+    }
     if (ctx.mode === 'filled' && selected.includes(option)) {
       if (kind === 'radio') {
         drawBox(ctx, {
@@ -265,6 +268,11 @@ async function addFillableWidgets(ctx: PdfContext, el: FieldElement): Promise<vo
   };
   const [tr, tg, tb] = hexToRgb01(s.textColor);
   const plain = { borderWidth: 0, textColor: rgb(tr, tg, tb) };
+  const markLook = {
+    borderWidth: Math.max(1, s.strokeWidth) * ctx.g.scale,
+    borderColor: pdfColor(s.stroke),
+    backgroundColor: pdfColor(s.fill),
+  };
   const size = s.fontSize * ctx.g.scale;
 
   switch (el.fieldType) {
@@ -273,8 +281,8 @@ async function addFillableWidgets(ctx: PdfContext, el: FieldElement): Promise<vo
     case 'longtext': {
       const field = form.createTextField(el.key);
       if (el.fieldType === 'longtext') field.enableMultiline();
-      field.setFontSize(size);
       field.addToPage(ctx.page, { ...widgetRect(ctx, inner), ...plain, font });
+      field.setFontSize(size); // needs the default appearance that addToPage creates
       if (el.required) field.enableRequired();
       field.updateAppearances(font);
       return;
@@ -282,8 +290,8 @@ async function addFillableWidgets(ctx: PdfContext, el: FieldElement): Promise<vo
     case 'dropdown': {
       const field = form.createDropdown(el.key);
       field.addOptions(el.options);
-      field.setFontSize(size);
       field.addToPage(ctx.page, { ...widgetRect(ctx, inner), ...plain, font });
+      field.setFontSize(size); // needs the default appearance that addToPage creates
       if (el.required) field.enableRequired();
       field.updateAppearances(font);
       return;
@@ -300,7 +308,7 @@ async function addFillableWidgets(ctx: PdfContext, el: FieldElement): Promise<vo
             width: FIELD_MARK_SIZE,
             height: FIELD_MARK_SIZE,
           }),
-          borderWidth: 0,
+          ...markLook,
         });
       }
       if (el.required) group.enableRequired();
@@ -318,7 +326,7 @@ async function addFillableWidgets(ctx: PdfContext, el: FieldElement): Promise<vo
             width: FIELD_MARK_SIZE,
             height: FIELD_MARK_SIZE,
           }),
-          borderWidth: 0,
+          ...markLook,
         });
         if (el.required && el.options.length === 1) box1.enableRequired();
       }

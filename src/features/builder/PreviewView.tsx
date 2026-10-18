@@ -1,5 +1,6 @@
 import { RotateCcw, Smartphone, Monitor, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { downloadPdf } from '@/pdf/downloadPdf';
 import { FillForm } from '@/features/fill/FillForm';
 import { useDocStore } from '@/store/docStore';
 import { useUiStore } from '@/store/uiStore';
@@ -60,7 +61,11 @@ export function PreviewView() {
             : 'h-full'
         }
       >
-        <FillForm doc={doc} repo={null} />
+        <FillForm
+          doc={doc}
+          repo={null}
+          onDownload={(answers) => downloadPdf(doc, answers, 'filled').then(() => undefined)}
+        />
       </div>
     </div>
   );

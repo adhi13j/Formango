@@ -268,12 +268,12 @@ Goal: by the end, the owner can open `/builder`, design a form, undo and redo, p
     - Unanswered fields still draw their empty box so the layout is intact.
   - **Done when:** a fully filled test submission looks right for all 7 field types in both presets, and a submission with empty optional fields looks intentional.
 
-- [ ] **2.8 PDF exporter: fillable mode** (should have, first thing cut if time slips)
+- [x] **2.8 PDF exporter: fillable mode** (should have, first thing cut if time slips)
   - **Do:** same drawing but fields become real AcroForm fields (`PDFForm`).
   - **Details:** text field per `text`/`date`; multiline for `longtext`; dropdown with `addOptions`; radio group with one option per row; one checkbox per option named `<key>__<index>`; signature drawn as a labeled empty box (pdf-lib cannot create signature fields). Field names use the element `key`. Set widget border color, width, background, text color, and font size from `inputStyle`. Mark `required` fields. Call `form.updateFieldAppearances(font)` with an embedded font so text renders in viewers. Open the result in Chrome, Preview/Acrobat, and a mobile viewer to confirm fields are fillable.
   - **Done when:** the exported blank PDF can be typed into in at least two viewers, and the fields line up with the design.
 
-- [ ] **2.9 Download UI**
+- [x] **2.9 Download UI**
   - **Do:** `downloadPdf(doc, answers, mode)` creates a Blob, an `<a download>`, clicks it, and revokes the URL. Wire: builder top bar overflow menu "Download fillable PDF", success screen "Download my copy (PDF)". Show a spinner in the button while generating, a toast on warnings (missing glyphs), and an error toast on failure with the error logged.
   - **Details:** file name `<title-slug>-<YYYY-MM-DD>.pdf` (slug: lowercase, hyphens, ASCII, fallback `form`).
   - **Done when:** both downloads work on desktop Chrome and iOS Safari, and the main bundle does not contain pdf-lib (check the build output).

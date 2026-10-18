@@ -17,6 +17,7 @@ import { exportJson, importJsonFile } from '@/lib/persistence';
 import { temporalStore, useDocStore } from '@/store/docStore';
 import { useUiStore } from '@/store/uiStore';
 import type { FormDoc } from '@/types/doc';
+import { downloadPdf } from '@/pdf/downloadPdf';
 import { hasContent } from '@/lib/submitButton';
 import { redo, undo } from './editorActions';
 import { addSampleElements } from './devTools';
@@ -165,6 +166,16 @@ export function TopBar() {
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={() => fileInput.current?.click()}>
               Import JSON
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onSelect={() => void downloadPdf(useDocStore.getState().doc, null, 'fillable')}
+            >
+              Download fillable PDF
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onSelect={() => void downloadPdf(useDocStore.getState().doc, null, 'filled')}
+            >
+              Download blank PDF
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <a href="/fill/local" target="_blank" rel="noopener">

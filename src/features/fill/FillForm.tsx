@@ -4,7 +4,7 @@ import { cleanAnswers, errorOrder, validateAnswers, validateField } from '@/lib/
 import { clearAnswerFiles } from '@/lib/fileAnswers';
 import { logError } from '@/lib/logError';
 import type { ResponsesRepo } from '@/lib/repo/responsesRepo';
-import type { FieldElement, FormDoc } from '@/types/doc';
+import type { Answers, FieldElement, FormDoc } from '@/types/doc';
 import { FormView } from './FormView';
 import { SuccessScreen } from './SuccessScreen';
 
@@ -17,7 +17,7 @@ interface FillFormProps {
   /** Where answers go. `null` in the builder's preview: submitting only shows the success screen. */
   repo: ResponsesRepo | null;
   /** Gives a PDF copy of the answers. Added to the success screen when present. */
-  onDownload?: ((answers: Record<string, AnswerValue>) => Promise<void>) | undefined;
+  onDownload?: ((answers: Answers) => Promise<void>) | undefined;
 }
 
 type Status = 'filling' | 'sending' | 'done';
@@ -160,7 +160,7 @@ export function FillForm({ doc, repo, onDownload }: FillFormProps) {
     ? async () => {
         setDownloading(true);
         try {
-          await onDownload(answersRef.current);
+          await onDownload(cleanAnswers(doc, answersRef.current));
         } finally {
           setDownloading(false);
         }

@@ -130,6 +130,7 @@ export default function PdfCompare() {
   const params = new URLSearchParams(window.location.search);
   const docName = params.get('doc') ?? 'kitchen-sink-mobile';
   const filled = params.get('filled') === '1';
+  const fillable = params.get('mode') === 'fillable';
   const [ready, setReady] = useState(false);
   // Text is laid out with real font widths, so nothing is drawn before the fonts are in.
   const [fontsReady, setFontsReady] = useState(false);
@@ -149,7 +150,9 @@ export default function PdfCompare() {
     void (async () => {
       await loadFonts(fontsUsedBy(doc));
       setFontsReady(true);
-      const result = await exportPdf(doc, filled ? answers : null, { mode: 'filled' });
+      const result = await exportPdf(doc, filled ? answers : null, {
+        mode: fillable ? 'fillable' : 'filled',
+      });
       const pdfjs = await import('pdfjs-dist');
       pdfjs.GlobalWorkerOptions.workerSrc = new URL(
         'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -176,7 +179,7 @@ export default function PdfCompare() {
     return () => {
       cancelled = true;
     };
-  }, [doc, filled, answers]);
+  }, [doc, filled, fillable, answers]);
 
   if (!doc) return <p>Unknown doc "{docName}"</p>;
   const height = Math.round(displayHeight(doc));
