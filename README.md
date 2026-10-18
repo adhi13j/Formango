@@ -13,7 +13,7 @@ Design a form like a document, share a link, let people fill it in on their phon
 - **Fill page:** works on phones, validates as you go, turns boxes green when they are filled, and shows a thank-you screen.
 - **PDF:** a filled copy that matches the design, and a **fillable blank PDF** with real form fields. Both are made in the browser.
 - **Accounts and sharing:** sign up, save forms, publish a link, close it again, and see **responses** in a table with search, a side panel, per-response PDF, and CSV export.
-- **Eleven templates**, including a long insurance information sheet and an A4 job application.
+- **Nine templates**, including a long insurance information sheet and an A4 job application.
 - No ads, no tracking, no third-party scripts or fonts.
 
 ## Tech and why

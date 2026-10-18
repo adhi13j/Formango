@@ -332,18 +332,18 @@ Goal: by the end, the owner can open `/builder`, design a form, undo and redo, p
 
 # Phase 4: Landing, polish, deploy
 
-- [ ] **4.1 Landing and login page**
+- [x] **4.1 Landing and login page**
   - **Do:** build screen 1 from `layout.md`: nav, mango gradient presets panel with the diagonal edge and the auto-scrolling staggered preset cards (rendered from the template JSON), login card with sign up toggle and "Try the builder without an account". Redirect logged-in users to `/forms`.
   - **Details:** presets scroll via CSS animation on a duplicated list (seamless loop), pause on hover and focus-within, static under `prefers-reduced-motion`. Mobile layout per `layout.md`. Add 2 more templates if time allows (invoice request, feedback form).
   - **Done when:** it looks like the sketch, works at 390px, 768px, and 1440px, and there is no layout shift.
 
-- [ ] **4.2 Privacy page and footer**
+- [x] **4.2 Privacy page and footer**
   - **Do:** `/privacy` with plain-language text: what the app stores, that form owners can read responses, how to delete data, contact placeholder. Footer link on landing and fill page.
 
-- [ ] **4.3 Polish pass**
+- [x] **4.3 Polish pass**
   - **Do:** consistent spacing and focus states, hover and active states for every button, favicon, `<title>` and meta description per route, Open Graph tags (static image of the landing screenshot), 404 page, loading states, copy review (short, friendly, no jargon), remove `console.log`s and dead code.
 
-- [ ] **4.4 Performance and accessibility audit**
+- [x] **4.4 Performance and accessibility audit**
   - **Do:** run Lighthouse on the landing and fill pages (targets in `spec.md`). Check bundle sizes (`vite build` report), lazy-load the builder, PDF, and Moveable chunks. Run an automated accessibility check (axe) on the fill page and the builder shell and fix issues.
 
 - [ ] **4.5 Deploy to Cloudflare Pages**
@@ -352,7 +352,7 @@ Goal: by the end, the owner can open `/builder`, design a form, undo and redo, p
   - **Keep-alive:** add a free scheduled GitHub Action that pings the Supabase REST endpoint weekly so the free project does not pause.
   - **Done when:** the live URL works for signup, build, publish, fill, PDF, and a hard refresh on `/forms` and `/f/<slug>` does not 404.
 
-- [ ] **4.6 README and demo assets**
+- [x] **4.6 README and demo assets**
   - **Do:** README with a one-paragraph pitch, live link, screenshot of the builder, GIF of building and exporting, feature list, tech stack and why, architecture diagram, how to run locally (env vars, SQL), design decisions (single JSON doc, shared renderers, one text layout engine for screen and PDF, RLS), limitations, and roadmap. Add a short "What I learned" section.
 
 - [ ] **4.7 Final QA and handoff**
