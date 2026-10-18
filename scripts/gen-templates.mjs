@@ -82,8 +82,9 @@ const event = doc('Event registration', mobile(), [
   field('e-email', 'email', 'text', 'Email', 20, 266, 350, { required: true, validation: 'email', name: 'Email' }),
   field('e-ticket', 'ticket-type', 'radio', 'Ticket type', 20, 354, 350, { required: true, options: ['Standard', 'VIP', 'Student'], name: 'Ticket type' }),
   field('e-diet', 'dietary-needs', 'checkbox', 'Dietary needs', 20, 490, 350, { options: ['Vegetarian', 'Vegan', 'Gluten free', 'Nut allergy'], name: 'Dietary needs' }),
-  field('e-sign', 'signature', 'signature', 'Signature', 20, 658, 350, { required: true, name: 'Signature' }),
-  button('e-submit', 'Register', 20, 834, 350),
+  field('e-guests', 'guests', 'group', 'Guests you are bringing', 20, 658, 350, { name: 'Guests', itemLabel: 'Guest', addLabel: 'Add guest', minRows: 0, maxRows: 9, perRow: 2, height: 192, columns: [{ id: 'c1', label: 'Name', type: 'text', required: true, options: [] }, { id: 'c2', label: 'Ticket', type: 'dropdown', required: false, options: ['Standard', 'VIP', 'Student'] }] }),
+  field('e-sign', 'signature', 'signature', 'Signature', 20, 866, 350, { required: true, name: 'Signature' }),
+  button('e-submit', 'Register', 20, 1026, 350),
 ]);
 
 const feedback = doc('Customer feedback', mobile({ outer: '#FCE3E7' }), [
@@ -123,11 +124,11 @@ const wedding = doc('Wedding RSVP', mobile({ background: '#FFFBF3', outer: '#EFE
   line('w-line', 'Divider', 130, 340, 130, { color: C.butter, thickness: 2 }),
   field('w-name', 'name', 'text', 'Your name', 20, 364, 350, { required: true, name: 'Name', labelFont: 'lora', inputFont: 'lora', radius: 4 }),
   field('w-att', 'attending', 'radio', 'Will you join us?', 20, 452, 350, { required: true, options: ['Joyfully accepts', 'Regretfully declines'], name: 'Attending', labelFont: 'lora', inputFont: 'lora', radius: 4 }),
-  field('w-guests', 'guests', 'dropdown', 'How many guests (including you)?', 20, 548, 350, { options: ['1', '2', '3', '4'], name: 'Guests', labelFont: 'lora', inputFont: 'lora', radius: 4 }),
-  field('w-diet', 'dietary', 'checkbox', 'Dietary needs', 20, 636, 350, { options: ['Vegetarian', 'Vegan', 'Gluten free'], name: 'Dietary', labelFont: 'lora', inputFont: 'lora', radius: 4 }),
-  field('w-song', 'song', 'text', 'A song that gets you dancing', 20, 764, 350, { placeholder: 'Optional', name: 'Song', labelFont: 'lora', inputFont: 'lora', radius: 4 }),
-  field('w-note', 'note', 'longtext', 'A note for the couple', 20, 852, 350, { height: 110, name: 'Note', labelFont: 'lora', inputFont: 'lora', radius: 4 }),
-  button('w-submit', 'Send RSVP', 20, 994, 350, { font: 'lora', radius: 24 }),
+  field('w-guests', 'guests', 'group', 'Who is coming with you?', 20, 548, 350, { name: 'Guests', labelFont: 'lora', inputFont: 'lora', radius: 4, itemLabel: 'Guest', addLabel: 'Add guest', minRows: 0, maxRows: 6, perRow: 2, height: 192, columns: [{ id: 'c1', label: 'Name', type: 'text', required: true, options: [] }, { id: 'c2', label: 'Meal', type: 'dropdown', required: false, options: ['Chicken', 'Fish', 'Vegetarian', 'Vegan'] }] }),
+  field('w-diet', 'dietary', 'checkbox', 'Dietary needs', 20, 756, 350, { options: ['Vegetarian', 'Vegan', 'Gluten free'], name: 'Dietary', labelFont: 'lora', inputFont: 'lora', radius: 4 }),
+  field('w-song', 'song', 'text', 'A song that gets you dancing', 20, 892, 350, { placeholder: 'Optional', name: 'Song', labelFont: 'lora', inputFont: 'lora', radius: 4 }),
+  field('w-note', 'note', 'longtext', 'A note for the couple', 20, 980, 350, { height: 110, name: 'Note', labelFont: 'lora', inputFont: 'lora', radius: 4 }),
+  button('w-submit', 'Send RSVP', 20, 1106, 350, { font: 'lora', radius: 24 }),
 ]);
 
 const support = doc('Support request', mobile({ outer: '#D5ECEC' }), [
@@ -151,11 +152,11 @@ const lunch = doc('Lunch order', mobile({ outer: '#FFE3B0' }), [
   text('l-title', 'Title', 'Lunch order', 20, 52, 220, { role: 'heading', font: 'poppins', size: 32, weight: 700 }),
   text('l-sub', 'Subtitle', 'Orders close at 11:00 sharp.', 20, 104, 220, { weight: 700 }),
   field('l-name', 'name', 'text', 'Name', 20, 200, 350, { required: true, name: 'Name', radius: 12 }),
-  field('l-main', 'main', 'radio', 'Pick your main', 20, 288, 350, { required: true, options: ['Burger', 'Falafel wrap', 'Caesar salad', 'Soup of the day'], name: 'Main', radius: 12 }),
-  field('l-extra', 'extras', 'checkbox', 'Add extras', 20, 468, 350, { options: ['Fries', 'Drink', 'Cookie', 'Extra sauce'], name: 'Extras', radius: 12 }),
-  field('l-time', 'pickup', 'dropdown', 'Pickup time', 20, 636, 350, { required: true, options: ['12:00', '12:30', '13:00', '13:30'], name: 'Pickup time', radius: 12 }),
-  field('l-notes', 'notes', 'longtext', 'Notes for the kitchen', 20, 724, 350, { height: 100, name: 'Notes', radius: 12 }),
-  button('l-submit', 'Place order', 20, 852, 350, { fill: C.ink, text: C.mango, font: 'poppins', radius: 24 }),
+  field('l-main', 'items', 'group', 'Your order', 20, 288, 350, { required: true, radius: 12, name: 'Order', itemLabel: 'Item', addLabel: 'Add another item', minRows: 1, maxRows: 8, perRow: 2, height: 192, columns: [{ id: 'c1', label: 'Main', type: 'dropdown', required: true, options: ['Burger', 'Falafel wrap', 'Caesar salad', 'Soup of the day'] }, { id: 'c2', label: 'How many', type: 'number', required: true, options: [] }] }),
+  field('l-extra', 'extras', 'checkbox', 'Add extras', 20, 496, 350, { options: ['Fries', 'Drink', 'Cookie', 'Extra sauce'], name: 'Extras', radius: 12 }),
+  field('l-time', 'pickup', 'dropdown', 'Pickup time', 20, 664, 350, { required: true, options: ['12:00', '12:30', '13:00', '13:30'], name: 'Pickup time', radius: 12 }),
+  field('l-notes', 'notes', 'longtext', 'Notes for the kitchen', 20, 752, 350, { height: 100, name: 'Notes', radius: 12 }),
+  button('l-submit', 'Place order', 20, 868, 350, { fill: C.ink, text: C.mango, font: 'poppins', radius: 24 }),
 ]);
 
 const COL = 345, RIGHT = 409;

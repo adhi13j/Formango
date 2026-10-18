@@ -28,6 +28,8 @@ export interface UiState {
   restoreBackup: string | null;
   sizeDialogOpen: boolean;
   shortcutsOpen: boolean;
+  /** True when the saved form was changed somewhere else (another tab) since it was opened. */
+  conflict: boolean;
 
   select: (ids: string[]) => void;
   toggleSelect: (id: string) => void;
@@ -47,6 +49,7 @@ export interface UiState {
   pushRecentColor: (hex: string) => void;
   setRecentColors: (colors: string[]) => void;
   setStorageError: (message: string | null) => void;
+  setConflict: (conflict: boolean) => void;
   setRestoreBackup: (raw: string | null) => void;
   setSizeDialogOpen: (open: boolean) => void;
   setShortcutsOpen: (open: boolean) => void;
@@ -72,6 +75,7 @@ export const useUiStore = create<UiState>()((set) => ({
   layersOpen: false,
   recentColors: [],
   storageError: null,
+  conflict: false,
   restoreBackup: null,
   sizeDialogOpen: false,
   shortcutsOpen: false,
@@ -117,6 +121,7 @@ export const useUiStore = create<UiState>()((set) => ({
   setRecentColors: (recentColors) =>
     set({ recentColors: recentColors.slice(0, RECENT_COLORS_MAX) }),
   setStorageError: (storageError) => set({ storageError }),
+  setConflict: (conflict) => set({ conflict }),
   setRestoreBackup: (restoreBackup) => set({ restoreBackup }),
   setSizeDialogOpen: (sizeDialogOpen) => set({ sizeDialogOpen }),
   setShortcutsOpen: (shortcutsOpen) => set({ shortcutsOpen }),

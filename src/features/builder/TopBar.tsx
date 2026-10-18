@@ -1,5 +1,6 @@
 import { Eye, EyeOff, MoreHorizontal, Redo2, Undo2 } from 'lucide-react';
 import { useRef, useState } from 'react';
+import { useNavigate } from 'react-router';
 import { useStore } from 'zustand';
 import { toast } from 'sonner';
 import { IconButton } from '@/components/common/IconButton';
@@ -18,9 +19,12 @@ import { temporalStore, useDocStore } from '@/store/docStore';
 import { useUiStore } from '@/store/uiStore';
 import type { FormDoc } from '@/types/doc';
 import { downloadPdf } from '@/pdf/downloadPdf';
+import { useCloudStore } from '@/store/cloudStore';
 import { hasContent } from '@/lib/submitButton';
 import { redo, undo } from './editorActions';
 import { addSampleElements } from './devTools';
+import { useBuilderSource } from './builderSource';
+import { PublishDialog } from './dialogs/PublishDialog';
 import { ConfirmDialog } from './dialogs/ConfirmDialog';
 import { NewDesignDialog } from './dialogs/NewDesignDialog';
 import { formatShortcut } from './shortcuts';
@@ -84,6 +88,10 @@ export function TopBar() {
   const fileInput = useRef<HTMLInputElement>(null);
   const [pendingImport, setPendingImport] = useState<FormDoc | null>(null);
   const [confirmNew, setConfirmNew] = useState(false);
+  const [publishOpen, setPublishOpen] = useState(false);
+  const source = useBuilderSource();
+  const navigate = useNavigate();
+  const published = useCloudStore((s) => s.meta?.published ?? false);
 
   const onFile = async (file: File | undefined) => {
     if (!file) return;
@@ -98,7 +106,7 @@ export function TopBar() {
 
   return (
     <header className="flex h-14 items-center gap-3 border-b border-border bg-card px-4">
-      <Logo />
+      <Logo to={source.formId ? '/forms' : '/'} />
       <TitleField />
       <div className="ml-2 flex items-center gap-1">
         <IconButton
@@ -134,13 +142,19 @@ export function TopBar() {
         </Button>
         <Tooltip>
           <TooltipTrigger asChild>
-            <span tabIndex={0} className="inline-flex rounded-md">
-              <Button disabled aria-disabled="true" className="pointer-events-none">
-                Publish
-              </Button>
-            </span>
+            <Button
+              onClick={() =>
+                source.formId ? setPublishOpen(true) : navigate('/login?redirectTo=%2Fforms')
+              }
+            >
+              {published ? 'Share' : 'Publish'}
+            </Button>
           </TooltipTrigger>
-          <TooltipContent>Coming soon</TooltipContent>
+          <TooltipContent>
+            {source.formId
+              ? 'Get a link people can fill in'
+              : 'Sign in to publish and share a link'}
+          </TooltipContent>
         </Tooltip>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -208,6 +222,7 @@ export function TopBar() {
           }}
         />
       </div>
+      <PublishDialog open={publishOpen} onOpenChange={setPublishOpen} />
       <NewDesignDialog
         open={confirmNew}
         onCancel={() => setConfirmNew(false)}

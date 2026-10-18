@@ -29,7 +29,7 @@ const SOURCES: { id: string; name: string; description: string; json: unknown }[
   {
     id: 'event-registration',
     name: 'Event registration',
-    description: 'Tickets, diet, and a signature',
+    description: 'Tickets, extra guests, diet, and a signature',
     json: eventRegistration,
   },
   {
@@ -47,7 +47,7 @@ const SOURCES: { id: string; name: string; description: string; json: unknown }[
   {
     id: 'wedding-rsvp',
     name: 'Wedding RSVP',
-    description: 'Elegant, with guests and diet',
+    description: 'Elegant, with an Add guest list and meals',
     json: weddingRsvp,
   },
   {
@@ -59,7 +59,7 @@ const SOURCES: { id: string; name: string; description: string; json: unknown }[
   {
     id: 'lunch-order',
     name: 'Lunch order',
-    description: 'Pick a main, extras, and a time',
+    description: 'Add several items, extras, and a pickup time',
     json: lunchOrder,
   },
   {

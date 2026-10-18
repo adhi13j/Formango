@@ -21,8 +21,25 @@ function Banner({ children }: { children: React.ReactNode }) {
 export function Banners() {
   const storageError = useUiStore((s) => s.storageError);
   const restoreBackup = useUiStore((s) => s.restoreBackup);
+  const conflict = useUiStore((s) => s.conflict);
+  const resolve = (choice: 'reload' | 'overwrite') =>
+    window.dispatchEvent(new CustomEvent('formango:resolve-conflict', { detail: choice }));
   return (
     <>
+      {conflict && (
+        <Banner>
+          <span className="flex-1">
+            This form changed in another tab. Reload to see the newer version, or overwrite it with
+            what is on this page.
+          </span>
+          <Button size="sm" variant="secondary" onClick={() => resolve('reload')}>
+            Reload
+          </Button>
+          <Button size="sm" variant="secondary" onClick={() => resolve('overwrite')}>
+            Overwrite
+          </Button>
+        </Banner>
+      )}
       {storageError && (
         <Banner>
           <span className="flex-1">

@@ -1,13 +1,18 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router';
 import { Toaster } from 'sonner';
 import { ErrorBoundary } from '@/app/ErrorBoundary';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { loadAllFonts } from '@/lib/fonts';
+import { usePageMeta } from '@/lib/usePageMeta';
+import { useDocStore } from '@/store/docStore';
 import { startStoreSync } from '@/store/sync';
 import { useUiStore } from '@/store/uiStore';
 import { Banners } from './Banners';
+import { BuilderSourceContext } from './builderSource';
+import { useCloudPersistence } from './useCloudPersistence';
 import { BottomBar } from './BottomBar';
 import { Canvas } from './Canvas';
 import { ChooseSizeDialog } from './dialogs/ChooseSizeDialog';
@@ -34,8 +39,7 @@ function SmallScreenMessage() {
   );
 }
 
-function BuilderShell() {
-  const { ready } = usePersistence();
+function BuilderShell({ ready }: { ready: boolean }) {
   const [fontsReady, setFontsReady] = useState(false);
   const mode = useUiStore((s) => s.mode);
   useEditorShortcuts();
@@ -84,14 +88,51 @@ function BuilderShell() {
   );
 }
 
-export default function BuilderPage() {
+/** The guest builder: the design lives in this browser. */
+function GuestBuilder() {
+  const { ready } = usePersistence();
+  return <BuilderShell ready={ready} />;
+}
+
+/** A saved form of a signed-in account. */
+function CloudBuilder({ formId }: { formId: string }) {
+  const load = useCloudPersistence(formId);
+  const title = useDocStore((s) => s.doc.title);
+  usePageMeta(load.status === 'ready' ? `${title} · Formango` : 'Formango');
+  if (load.status === 'error') {
+    return (
+      <main className="mx-auto flex min-h-screen max-w-sm flex-col items-center justify-center gap-4 p-8 text-center">
+        <h1 className="text-2xl font-bold text-foreground">We could not open this form</h1>
+        <p className="text-muted-foreground">{load.message}</p>
+        <Button asChild>
+          <Link to="/forms">Back to my forms</Link>
+        </Button>
+      </main>
+    );
+  }
+  return <BuilderShell ready={load.status === 'ready'} />;
+}
+
+/** `/builder` (guest) when called without a form id, `/forms/:id/edit` with one. */
+export default function BuilderPage({ formId }: { formId?: string }) {
   const wide = useMediaQuery('(min-width: 1024px)');
   const mode = useUiStore((s) => s.mode);
+  const source = useMemo(() => ({ formId: formId ?? null }), [formId]);
   return (
     <TooltipProvider delayDuration={300}>
-      <title>Builder | Formango</title>
-      {wide || mode === 'preview' ? <BuilderShell /> : <SmallScreenMessage />}
-      <Toaster position="bottom-center" richColors={false} />
+      <BuilderSourceContext.Provider value={source}>
+        {formId === undefined && <title>Builder | Formango</title>}
+        {wide || mode === 'preview' ? (
+          formId ? (
+            <CloudBuilder formId={formId} />
+          ) : (
+            <GuestBuilder />
+          )
+        ) : (
+          <SmallScreenMessage />
+        )}
+        <Toaster position="bottom-center" richColors={false} />
+      </BuilderSourceContext.Provider>
     </TooltipProvider>
   );
 }

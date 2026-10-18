@@ -108,3 +108,12 @@ create policy "owners read response files" on storage.objects
       where f.id::text = (storage.foldername(name))[1] and f.owner_id = auth.uid()
     )
   );
+
+-- Response counts for the "My forms" page, in one query. Runs with the caller's rights, so Row
+-- Level Security still applies: you only count responses of your own forms.
+create or replace function public.my_response_counts()
+returns table (form_id uuid, total bigint)
+language sql security invoker stable as $$
+  select r.form_id, count(*) from public.responses r group by r.form_id
+$$;
+grant execute on function public.my_response_counts() to authenticated;

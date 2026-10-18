@@ -233,10 +233,66 @@
       }
     },
     {
+      "id": "e-guests",
+      "name": "Guests",
+      "x": 20,
+      "y": 658,
+      "width": 350,
+      "height": 192,
+      "locked": false,
+      "hidden": false,
+      "type": "field",
+      "fieldType": "group",
+      "key": "guests",
+      "label": "Guests you are bringing",
+      "placeholder": "",
+      "required": false,
+      "validation": "none",
+      "options": [],
+      "fileKinds": [],
+      "maxFileMb": 5,
+      "columns": [
+        {
+          "id": "c1",
+          "label": "Name",
+          "type": "text",
+          "required": true,
+          "options": []
+        },
+        {
+          "id": "c2",
+          "label": "Ticket",
+          "type": "dropdown",
+          "required": false,
+          "options": ["Standard", "VIP", "Student"]
+        }
+      ],
+      "itemLabel": "Guest",
+      "addLabel": "Add guest",
+      "minRows": 0,
+      "maxRows": 9,
+      "perRow": 2,
+      "labelStyle": {
+        "fontFamily": "dm-sans",
+        "fontSize": 14,
+        "fontWeight": 700,
+        "color": "#2A1805"
+      },
+      "inputStyle": {
+        "fontFamily": "dm-sans",
+        "fontSize": 16,
+        "textColor": "#2A1805",
+        "fill": "#FFFFFF",
+        "stroke": "#A58B6A",
+        "strokeWidth": 1,
+        "radius": 8
+      }
+    },
+    {
       "id": "e-sign",
       "name": "Signature",
       "x": 20,
-      "y": 658,
+      "y": 866,
       "width": 350,
       "height": 144,
       "locked": false,
@@ -277,7 +333,7 @@
       "id": "e-submit",
       "name": "Submit button",
       "x": 20,
-      "y": 834,
+      "y": 1026,
       "width": 350,
       "height": 48,
       "locked": false,
