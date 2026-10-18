@@ -16,6 +16,14 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
+    /* Path alias */
+    "paths": { "@/*": ["./src/*"] },
+
+    /* Strictness */
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+
     /* Linting */
     "noUnusedLocals": true,
     "noUnusedParameters": true,

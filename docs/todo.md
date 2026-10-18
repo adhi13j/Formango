@@ -27,7 +27,7 @@ Sizes replace the old hour estimates, which were unrealistic (Moveable snapping 
   - **Details:** add `.gitignore` (node_modules, dist, .env, .env.local, .DS_Store). Create `.env.example` with `VITE_SUPABASE_URL=` and `VITE_SUPABASE_ANON_KEY=` (empty). Create a GitHub repo and push, so there is an off-machine backup from day one.
   - **Done when:** `npm run dev` serves the default page. First commit made and pushed.
 
-- [ ] **0.2 TypeScript strictness and aliases**
+- [x] **0.2 TypeScript strictness and aliases**
   - **Do:** in `tsconfig`, enable `strict`, `noUncheckedIndexedAccess`, `noImplicitOverride`. Add path alias `@/*` to `src/*` in both tsconfig and `vite.config.ts`.
   - **Done when:** `import x from '@/lib/x'` works and `npm run typecheck` (`tsc --noEmit`) passes.
 
