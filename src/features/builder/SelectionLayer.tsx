@@ -1,9 +1,7 @@
 import { Lock } from 'lucide-react';
 import {
-  forwardRef,
   useCallback,
   useEffect,
-  useImperativeHandle,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -29,14 +27,13 @@ import { useDocStore } from '@/store/docStore';
 import { useUiStore } from '@/store/uiStore';
 import type { DocElement } from '@/types/doc';
 
+/**
+ * Size of the element being resized, passed to its renderer so text and fields re-wrap while the
+ * handle moves. Position is never included: Moveable moves the element with a CSS transform.
+ */
 export interface LiveGeometry {
   id: string;
-  rect: Rect;
-}
-
-export interface SelectionLayerHandle {
-  /** Starts dragging `node` from the pointer press that just selected it. */
-  beginDrag: (event: PointerEvent, node: HTMLElement) => void;
+  rect: { width: number; height: number };
 }
 
 interface SelectionLayerProps {
@@ -70,8 +67,16 @@ function directionsFor(el: DocElement): string[] {
 const sameList = (a: readonly number[], b: readonly number[]) =>
   a.length === b.length && a.every((value, i) => value === b[i]);
 
-export const SelectionLayer = forwardRef<SelectionLayerHandle, SelectionLayerProps>(
-  function SelectionLayer({ sizerRef, zoom, offsetX, offsetY, pageHeight, disabled, onLive }, ref) {
+export function SelectionLayer({
+  sizerRef,
+  zoom,
+  offsetX,
+  offsetY,
+  pageHeight,
+  disabled,
+  onLive,
+}: SelectionLayerProps) {
+  {
     const selectedIds = useUiStore((s) => s.selectedIds);
     const editingId = useUiStore((s) => s.editingId);
     const elements = useDocStore((s) => s.doc.elements);
@@ -84,7 +89,7 @@ export const SelectionLayer = forwardRef<SelectionLayerHandle, SelectionLayerPro
     const canTransform =
       selected.length > 0 && selected.every((el) => !el.locked) && !editingId && !disabled;
 
-    const rootRef = useRef<HTMLDivElement>(null);
+    const [root, setRoot] = useState<HTMLDivElement | null>(null);
     const moveableRef = useRef<Moveable>(null);
     const [targets, setTargets] = useState<HTMLElement[]>([]);
     const [guides, setGuides] = useState<{ xs: number[]; ys: number[] }>({ xs: [], ys: [] });
@@ -201,7 +206,7 @@ export const SelectionLayer = forwardRef<SelectionLayerHandle, SelectionLayerPro
       const id = gesture.current ? [...gesture.current.starts.keys()][0] : undefined;
       const rect = liveRect.current;
       if (!id || !rect) return;
-      onLive({ id, rect });
+      onLive({ id, rect: { width: rect.width, height: rect.height } });
       setBadge({
         x: offsetX + (rect.x + rect.width / 2) * zoom,
         y: offsetY + (rect.y + rect.height) * zoom + 10,
@@ -246,10 +251,15 @@ export const SelectionLayer = forwardRef<SelectionLayerHandle, SelectionLayerPro
         width: normalized.width,
         height: normalized.height,
       };
+      // Keep the DOM in step with what Moveable expects: size plus a transform for the offset.
+      const node = event.target as HTMLElement;
+      node.style.width = `${normalized.width}px`;
+      node.style.height = `${normalized.height}px`;
+      node.style.transform = `translate(${normalized.x - el.x}px, ${normalized.y - el.y}px)`;
       if (!frame.current) frame.current = requestAnimationFrame(flushLive);
     };
 
-    const resizeEnd = (el: DocElement, wasDrag: boolean) => {
+    const resizeEnd = (el: DocElement, wasDrag: boolean, node: HTMLElement) => {
       cancelAnimationFrame(frame.current);
       frame.current = 0;
       const rect = liveRect.current;
@@ -260,19 +270,14 @@ export const SelectionLayer = forwardRef<SelectionLayerHandle, SelectionLayerPro
       // Commit before clearing the live override so the element never flashes back.
       if (wasDrag && rect) useDocStore.getState().updateElement(el.id, rect);
       onLive(null);
+      node.style.transform = '';
+      const committed = useDocStore.getState().doc.elements.find((e) => e.id === el.id);
+      if (committed) {
+        node.style.width = `${committed.width}px`;
+        node.style.height = `${committed.height}px`;
+      }
       flushSync(() => setKeepRatio(false));
     };
-
-    useImperativeHandle(ref, () => ({
-      beginDrag: (event, node) => {
-        // The press that selected `node` also starts its drag. Locked elements stay put.
-        const id = node.dataset.elementId;
-        const el = useDocStore.getState().doc.elements.find((e) => e.id === id);
-        if (!el || el.locked || disabled) return;
-        flushSync(() => setTargets([node]));
-        moveableRef.current?.dragStart(event, node);
-      },
-    }));
 
     useEffect(() => () => cancelAnimationFrame(frame.current), []);
 
@@ -281,7 +286,7 @@ export const SelectionLayer = forwardRef<SelectionLayerHandle, SelectionLayerPro
 
     return (
       <div
-        ref={rootRef}
+        ref={setRoot}
         data-canvas-ui
         className="pointer-events-none absolute inset-0"
         style={{ zIndex: 5 }}
@@ -345,13 +350,13 @@ export const SelectionLayer = forwardRef<SelectionLayerHandle, SelectionLayerPro
           </div>
         )}
 
-        {canTransform && targets.length > 0 && (
+        {root && canTransform && targets.length > 0 && (
           <Moveable
             ref={moveableRef}
             flushSync={flushSync}
             className="fm-moveable"
-            container={rootRef.current}
-            rootContainer={rootRef.current}
+            container={root}
+            useAccuratePosition
             target={targets.length === 1 ? targets[0] : targets}
             origin={false}
             draggable
@@ -388,10 +393,12 @@ export const SelectionLayer = forwardRef<SelectionLayerHandle, SelectionLayerPro
             }
             onResizeStart={(e: OnResizeStart) => single && resizeStart(e, single)}
             onResize={(e: OnResize) => single && resizeMove(e, single)}
-            onResizeEnd={(e: OnResizeEnd) => single && resizeEnd(single, e.isDrag)}
+            onResizeEnd={(e: OnResizeEnd) =>
+              single && resizeEnd(single, e.isDrag, e.target as HTMLElement)
+            }
           />
         )}
       </div>
     );
-  },
-);
+  }
+}

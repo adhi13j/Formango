@@ -101,13 +101,13 @@ Goal: by the end, the owner can open `/builder`, design a form, undo and redo, p
   - **UI store** (`src/store/uiStore.ts`, not in history): `selectedIds`, `editingId`, `zoom`, `fitMode`, `activeRail`, `mode: 'edit'|'preview'`, `previewDevice: 'desktop'|'phone'`, `snapEnabled`, `gridEnabled`, `clipboard`, `saveStatus`, `layersOpen`.
   - **Done when:** tests for add, update, delete, reorder, duplicate, undo/redo, clamping, min-size enforcement, and "no-op change adds no history".
 
-- [ ] **1.5 Local persistence**
+- [x] **1.5 Local persistence**
   - **Do:** `src/lib/persistence.ts`: save to `localStorage['formango:builder:doc:v1']` debounced 500ms after any doc change; load on startup through Zod and `migrate`.
   - **Details:** apply the storage decision in `decisions.md` (IndexedDB via `idb-keyval`, or localStorage with lower guest limits). The key names below are for localStorage; mirror them if IndexedDB is chosen. Set `saveStatus` to `saving` then `saved`. Wrap every storage call in try/catch (quota, private mode). On failure set status `error` and show a banner with **Download backup (JSON)**. On invalid stored data: toast "Couldn't restore your last design", keep the raw string available for download, load a blank doc. Add `beforeunload` warning only while status is `error`.
   - **Export/import:** `exportJson()` downloads `<title-slug>.formango.json`. `importJson(file)` validates with Zod, shows specific errors, and asks before replacing a non-empty doc.
   - **Done when:** edit, reload, and the design is back. Corrupt the localStorage value by hand and the app recovers.
 
-- [ ] **1.6 App shell for the builder**
+- [x] **1.6 App shell for the builder**
   - **Do:** build the layout from `layout.md` section 3: top bar (56), contextual toolbar (48), rail (72), flyout (280), workspace, bottom bar (44). Use CSS grid. The workspace is the only scrolling region.
   - **Details:** top bar: logo, editable title (click to edit, Enter commits, Esc cancels, empty falls back to "Untitled form", max 120), undo and redo buttons (disabled when impossible, with tooltips showing shortcuts), save status, Preview toggle, Publish (disabled, tooltip "Coming soon"), overflow menu (New design, Export JSON, Import JSON, Keyboard shortcuts). Below 1024px width show the "use a larger screen" message. Rail buttons are real `<button>`s with `aria-pressed`. Flyout closes on Esc and on canvas click.
   - **Choose size dialog:** if no saved doc exists, or on "New design", show a dialog with the two presets (visual cards with a small illustration, name, one-line description). Mobile form is preselected.
@@ -115,12 +115,12 @@ Goal: by the end, the owner can open `/builder`, design a form, undo and redo, p
 
 - [x] **1.7 Fonts ready gate**: merged into 1.3. Verify when 1.8 lands: no layout jump after first paint when using Poppins or Playfair.
 
-- [ ] **1.8 Canvas, page, and zoom**
+- [x] **1.8 Canvas, page, and zoom**
   - **Do:** `src/features/builder/Canvas.tsx`: scroll workspace containing a sizer div (`width = pageWidth*zoom + padding`, `height = displayHeight*zoom + padding`) and the page div with `transform: scale(zoom)`, `transform-origin: 0 0`, absolutely positioned and centered when smaller than the viewport.
   - **Details:** fit zoom = `min(1, (workspaceWidth - 160) / pageWidth)`, recomputed on resize (ResizeObserver) while `fitMode` is on. Manual zoom turns off fit mode. Zoom with Ctrl/Cmd+wheel keeps the point under the cursor fixed (adjust scroll). Buttons, presets, and shortcuts (`Ctrl +`, `Ctrl -`, `0`, `1`) go through one `setZoom(value, anchor?)` function that clamps 0.25 to 3 and rounds to 1%. Space + drag pans (cursor `grab`/`grabbing`). The page has `shadow-page` and the page background color. Mobile preset: page height follows `displayHeight(doc)`.
   - **Done when:** zoom 25% to 300% works smoothly, text stays sharp, page stays centered, scrollbars behave, and fit mode follows window resize.
 
-- [ ] **1.9 Element renderers**
+- [x] **1.9 Element renderers**
   - **Do:** `src/components/elements/` with `ElementView.tsx` and one component per type: `TextView`, `ShapeView`, `LineView`, `ImageView`, `FieldView`. Props: `{ el, mode }`. Memoize with `React.memo` and compare by element reference.
   - **Details:**
     - Every element root: `position:absolute; left:x; top:y; width; height; box-sizing:border-box`. `data-element-id` attribute for hit testing. `pointer-events: none` on children in `edit` mode, so the root receives all pointer events.
@@ -132,12 +132,12 @@ Goal: by the end, the owner can open `/builder`, design a form, undo and redo, p
     - Hidden elements: render nothing in `preview`/`fill`, render at 30% opacity with a dashed outline in `edit`.
   - **Done when:** a hard-coded test doc with one of each element renders correctly in edit and preview, text matches a manual browser-wrapped comparison within 1px per line.
 
-- [ ] **1.10 Selection**
+- [x] **1.10 Selection**
   - **Do:** `useSelection` logic in the canvas: click selects, Shift/Cmd-click toggles, click empty page or workspace clears, Esc clears, marquee drag selects intersecting elements (compute in doc coordinates, not DOM), Ctrl/Cmd+A selects all unlocked, hover outline on the element under the cursor.
   - **Details:** hit testing uses topmost element under the pointer (reverse z-order, skipping hidden). Locked elements are selectable but not draggable. Marquee rectangle uses `--selection` at 10% fill and 1px border. Marquee must not start when the pointer is on an element.
   - **Done when:** all selection paths work with 20 overlapping elements, including locked and hidden ones.
 
-- [ ] **1.11 Move, resize, and snapping with react-moveable**
+- [x] **1.11 Move, resize, and snapping with react-moveable**
   - **Do:** render `<Moveable>` for the current selection with `draggable`, `resizable`, `snappable`.
   - **Details (important):**
     - **Gesture performance:** during `onDrag`/`onResize`, apply the transform and size directly to the DOM node (what Moveable gives you). Do **not** write to the store on every pointer move. On `onDragEnd`/`onResizeEnd`, compute final x, y, width, height in **document pixels**, round to integers, run `normalize`, and call `updateElements` **once**. That makes one gesture equal one undo step.
@@ -152,7 +152,7 @@ Goal: by the end, the owner can open `/builder`, design a form, undo and redo, p
   - **Done when:** drag, resize, and snap feel smooth at 50%, 100%, and 200% zoom with 100 elements, guides appear and disappear correctly, and undo restores the pre-gesture state in one step.
   - **Mini-checkpoint A (short stop):** after this task, tell the owner how to run it and ask them to try move, resize, snap, zoom, and undo. This is the riskiest interaction code, so catch feel problems before building more on top.
 
-- [ ] **1.12 Add elements: rail panels**
+- [x] **1.12 Add elements: rail panels**
   - **Do:** implement the flyout panels from `layout.md`. **Click** adds at the center of the visible workspace area (converted to doc coordinates, clamped, offset by +16 for repeated adds to avoid perfect stacking). **Drag** from the panel onto the page uses HTML5 drag and drop with a custom MIME type (`application/x-formango-element`) and drops at the cursor.
   - **Details:** new element becomes selected and the flyout stays open. Defaults come from the table in `schema.md`. Field `key` is a slug of the label, made unique (`email`, `email-2`). New elements get a readable `name` ("Short text", "Heading"). Respect the 150 element cap with a toast. Uploads: accept PNG, JPG, WebP up to 5 MB; downscale to max 1600px on the long side with a canvas, re-encode (WebP or JPEG 0.85, PNG if transparent), reject if the result is over 1.5 MB, then add as a data URL. Reject SVG with an explanation.
   - **Done when:** each of the 7 fields, 3 text presets, 3 shapes, line, and image can be added by click and by drag, and appear exactly under the drop point.

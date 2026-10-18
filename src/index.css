@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 @import './styles/theme.css';
 @import './styles/fonts.css';
+@import 'tw-animate-css';
 
 *,
 *::before,
@@ -57,6 +58,7 @@ body {
 }
 
 .fm-moveable .moveable-control {
+  pointer-events: auto;
   width: 10px;
   height: 10px;
   margin-top: -5px;

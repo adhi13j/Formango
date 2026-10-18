@@ -9,7 +9,7 @@ test('landing route renders with its own title', async ({ page }) => {
 test('builder route renders with its own title', async ({ page }) => {
   await page.goto('/builder');
   await expect(page).toHaveTitle('Builder | Formango');
-  await expect(page.getByRole('heading', { name: 'Builder' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Choose a size' })).toBeVisible();
 });
 
 test('unknown routes show a friendly page with a link home', async ({ page }) => {
@@ -28,7 +28,9 @@ for (const path of ['/', '/builder', '/dev/theme', '/missing']) {
     page.on('pageerror', (error) => problems.push(error.message));
     await page.goto(path);
     await expect(page.locator('html')).toHaveAttribute('lang', 'en');
-    await expect(page.locator('h1').first()).toBeVisible();
+    await expect(
+      page.locator(path === '/builder' ? '[role="dialog"]' : 'h1').first(),
+    ).toBeVisible();
     expect(problems).toEqual([]);
   });
 }

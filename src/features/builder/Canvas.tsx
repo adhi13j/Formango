@@ -1,3 +1,4 @@
+import { flushSync } from 'react-dom';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { ElementView } from '@/components/elements/ElementView';
 import { Button } from '@/components/ui/button';
@@ -6,10 +7,12 @@ import { displayHeight, rectOf, rectsIntersect, screenToDoc, type Rect } from '@
 import { useDocStore } from '@/store/docStore';
 import { clampZoom, useUiStore } from '@/store/uiStore';
 import type { DocElement } from '@/types/doc';
-import { addElementToPage } from './addToPage';
+import { createImageElement } from '@/lib/elements';
+import { addElementToPage, addPreparedElement } from './addToPage';
+import { hasElementDrag, readDragPayload } from './dragData';
 import { canvasLayout, fitZoom, type Viewport } from './canvasLayout';
 import { registerCanvas } from './canvasBridge';
-import { SelectionLayer, type LiveGeometry, type SelectionLayerHandle } from './SelectionLayer';
+import { SelectionLayer, type LiveGeometry } from './SelectionLayer';
 import { isTypingTarget } from './keys';
 
 interface ZoomAnchor {
@@ -34,7 +37,6 @@ export function Canvas() {
 
   const workspaceRef = useRef<HTMLDivElement>(null);
   const pageRef = useRef<HTMLDivElement>(null);
-  const selectionRef = useRef<SelectionLayerHandle>(null);
   const [viewport, setViewport] = useState<Viewport>({ width: 0, height: 0 });
   const [live, setLive] = useState<LiveGeometry | null>(null);
   const [hoverId, setHoverId] = useState<string | null>(null);
@@ -245,9 +247,9 @@ export function Canvas() {
       return;
     }
     if (!ui.selectedIds.includes(id)) {
-      ui.select([id]);
-      // One press-and-drag moves an element that was not selected yet.
-      selectionRef.current?.beginDrag(event.nativeEvent, node);
+      // Select synchronously so Moveable is attached before the mousedown that follows this
+      // pointerdown arrives. One press-and-drag then moves an element that was not selected yet.
+      flushSync(() => ui.select([id]));
     }
   };
 
@@ -266,6 +268,19 @@ export function Canvas() {
     if (el && !el.locked && (el.type === 'text' || el.type === 'field')) {
       useUiStore.getState().select([id]);
       useUiStore.getState().setEditingId(id);
+    }
+  };
+
+  const onDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    const payload = readDragPayload(event.dataTransfer);
+    if (!payload) return;
+    event.preventDefault();
+    const at = toDoc({ x: event.clientX, y: event.clientY });
+    if ('kind' in payload) {
+      addElementToPage(payload.kind, at);
+    } else {
+      const { src, width, height, alt } = payload.image;
+      addPreparedElement('image', createImageElement(page, src, width, height, alt), at);
     }
   };
 
@@ -290,6 +305,12 @@ export function Canvas() {
       onPointerMove={onPointerMove}
       onPointerLeave={() => setHoverId(null)}
       onDoubleClick={onDoubleClick}
+      onDragOver={(event) => {
+        if (!hasElementDrag(event.dataTransfer)) return;
+        event.preventDefault();
+        event.dataTransfer.dropEffect = 'copy';
+      }}
+      onDrop={onDrop}
     >
       <div
         data-testid="sizer"
@@ -359,7 +380,6 @@ export function Canvas() {
         )}
 
         <SelectionLayer
-          ref={selectionRef}
           sizerRef={workspaceRef}
           zoom={zoom}
           offsetX={layout.offsetX}

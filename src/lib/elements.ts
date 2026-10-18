@@ -22,6 +22,7 @@ export type NewElementKind =
   | 'rounded-rect'
   | 'ellipse'
   | 'line'
+  | 'divider'
   | `field-${FieldType}`;
 
 export const ELEMENT_ID_LENGTH = 10;
@@ -180,6 +181,8 @@ export function createElement(
       return shapeElement(page, 'ellipse', 0);
     case 'line':
       return lineElement(page);
+    case 'divider':
+      return { ...lineElement(page), name: 'Divider', thickness: 1, height: 1 };
     default:
       return fieldElement(page, doc, kind.slice('field-'.length) as FieldType);
   }

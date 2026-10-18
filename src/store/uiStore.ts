@@ -22,6 +22,10 @@ export interface UiState {
   saveStatus: SaveStatus;
   layersOpen: boolean;
   recentColors: string[];
+  /** Message when the last save failed. Null when saving works. */
+  storageError: string | null;
+  /** Raw text of a saved design that could not be restored, kept so it can be downloaded. */
+  restoreBackup: string | null;
   sizeDialogOpen: boolean;
   shortcutsOpen: boolean;
 
@@ -42,6 +46,8 @@ export interface UiState {
   setLayersOpen: (open: boolean) => void;
   pushRecentColor: (hex: string) => void;
   setRecentColors: (colors: string[]) => void;
+  setStorageError: (message: string | null) => void;
+  setRestoreBackup: (raw: string | null) => void;
   setSizeDialogOpen: (open: boolean) => void;
   setShortcutsOpen: (open: boolean) => void;
 }
@@ -65,6 +71,8 @@ export const useUiStore = create<UiState>()((set) => ({
   saveStatus: 'idle',
   layersOpen: false,
   recentColors: [],
+  storageError: null,
+  restoreBackup: null,
   sizeDialogOpen: false,
   shortcutsOpen: false,
 
@@ -108,6 +116,8 @@ export const useUiStore = create<UiState>()((set) => ({
     })),
   setRecentColors: (recentColors) =>
     set({ recentColors: recentColors.slice(0, RECENT_COLORS_MAX) }),
+  setStorageError: (storageError) => set({ storageError }),
+  setRestoreBackup: (restoreBackup) => set({ restoreBackup }),
   setSizeDialogOpen: (sizeDialogOpen) => set({ sizeDialogOpen }),
   setShortcutsOpen: (shortcutsOpen) => set({ shortcutsOpen }),
 }));
