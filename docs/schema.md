@@ -139,7 +139,7 @@ A field is **one element** containing a label and an input area. They move and r
 | radio | 350 x 88 | 350 x 88 | 2 options (18 + 6 + 2 x 32) |
 | checkbox | 350 x 88 | 350 x 88 | 2 options (18 + 6 + 2 x 32) |
 | date | 350 x 72 | 350 x 72 | Label "Date" |
-| signature | 350 x 140 | 350 x 140 | Label "Signature" |
+| signature | 350 x 144 | 350 x 144 | Label "Signature" (18 + 6 + 120 minimum box) |
 | rect shape | 350 x 120 | 714 x 120 | Fill mango-100, no stroke, radius 12 |
 | line | 350 x 2 | 714 x 2 | ink-300, solid |
 | image | natural ratio, max width 350 | max width 714 | `fit: 'cover'` |

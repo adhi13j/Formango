@@ -9,6 +9,8 @@ interface CanvasBridge {
   visibleCenter: () => Point;
   /** Converts a screen point (clientX, clientY) to document px. */
   clientToDoc: (client: Point) => Point;
+  /** Moves keyboard focus to the canvas, so shortcuts like Enter and arrow keys act on the selection. */
+  focus: () => void;
   /** Scrolls so the given document rect is visible. */
   reveal: (rect: { x: number; y: number; width: number; height: number }) => void;
 }

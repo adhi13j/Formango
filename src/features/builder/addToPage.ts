@@ -48,5 +48,6 @@ export function addPreparedElement(_kind: string, el: DocElement, at?: Point): s
   const added = useDocStore.getState().doc.elements.find((e) => e.id === placed.id);
   useUiStore.getState().select([placed.id]);
   if (added) getCanvas()?.reveal(added);
+  getCanvas()?.focus();
   return placed.id;
 }

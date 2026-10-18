@@ -20,6 +20,7 @@ import type { FormDoc } from '@/types/doc';
 import { redo, undo } from './editorActions';
 import { addSampleElements } from './devTools';
 import { ConfirmDialog } from './dialogs/ConfirmDialog';
+import { NewDesignDialog } from './dialogs/NewDesignDialog';
 import { formatShortcut } from './shortcuts';
 
 function TitleField() {
@@ -63,7 +64,12 @@ function SaveStatus() {
   const status = useUiStore((s) => s.saveStatus);
   const text = { idle: '', saving: 'Saving…', saved: 'Saved', error: 'Not saved' }[status];
   return (
-    <span role="status" aria-live="polite" className="min-w-16 text-sm text-muted-foreground">
+    <span
+      role="status"
+      aria-live="polite"
+      data-testid="save-status"
+      className="min-w-16 text-sm text-muted-foreground"
+    >
       {text}
     </span>
   );
@@ -75,6 +81,7 @@ export function TopBar() {
   const mode = useUiStore((s) => s.mode);
   const fileInput = useRef<HTMLInputElement>(null);
   const [pendingImport, setPendingImport] = useState<FormDoc | null>(null);
+  const [confirmNew, setConfirmNew] = useState(false);
 
   const onFile = async (file: File | undefined) => {
     if (!file) return;
@@ -140,7 +147,16 @@ export function TopBar() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onSelect={() => useUiStore.getState().setSizeDialogOpen(true)}>
+            <DropdownMenuItem
+              onSelect={() => {
+                // Nothing to lose on an empty page, so skip the prompt.
+                if (useDocStore.getState().doc.elements.length === 0) {
+                  useUiStore.getState().setSizeDialogOpen(true);
+                } else {
+                  setConfirmNew(true);
+                }
+              }}
+            >
               New design
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={() => exportJson(useDocStore.getState().doc)}>
@@ -175,6 +191,14 @@ export function TopBar() {
           }}
         />
       </div>
+      <NewDesignDialog
+        open={confirmNew}
+        onCancel={() => setConfirmNew(false)}
+        onContinue={() => {
+          setConfirmNew(false);
+          useUiStore.getState().setSizeDialogOpen(true);
+        }}
+      />
       <ConfirmDialog
         open={pendingImport !== null}
         title="Replace your current design?"

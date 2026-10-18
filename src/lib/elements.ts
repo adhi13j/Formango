@@ -98,11 +98,13 @@ function fieldElement(
   const fullWidth =
     fieldType === 'longtext' ? contentWidth(page) : Math.min(350, contentWidth(page));
   const height =
-    fieldType === 'longtext' || fieldType === 'signature'
+    fieldType === 'longtext'
       ? 140
-      : fieldType === 'radio' || fieldType === 'checkbox'
-        ? optionListHeight(14, options.length)
-        : 72;
+      : fieldType === 'signature'
+        ? 144
+        : fieldType === 'radio' || fieldType === 'checkbox'
+          ? optionListHeight(14, options.length)
+          : 72;
   const taken = new Set(doc.elements.flatMap((el) => (el.type === 'field' ? [el.key] : [])));
   return {
     ...baseOf(page, name, height, fullWidth),

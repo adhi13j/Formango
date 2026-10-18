@@ -12,8 +12,9 @@ import { addElementToPage, addPreparedElement } from './addToPage';
 import { hasElementDrag, readDragPayload } from './dragData';
 import { canvasLayout, fitZoom, type Viewport } from './canvasLayout';
 import { registerCanvas } from './canvasBridge';
+import { InlineEditor } from './InlineEditor';
 import { SelectionLayer, type LiveGeometry } from './SelectionLayer';
-import { isTypingTarget } from './keys';
+import { isActivatable, isTypingTarget } from './keys';
 
 interface ZoomAnchor {
   docX: number;
@@ -110,7 +111,7 @@ export function Canvas() {
   // ---- Space + drag to pan ------------------------------------------------------------------
   useEffect(() => {
     const down = (event: KeyboardEvent) => {
-      if (event.code === 'Space' && !isTypingTarget(event.target)) {
+      if (event.code === 'Space' && !isTypingTarget(event.target) && !isActivatable(event.target)) {
         event.preventDefault();
         setSpaceDown(true);
       }
@@ -151,6 +152,7 @@ export function Canvas() {
           y: Math.min(Math.max(point.y, 0), h),
         };
       },
+      focus: () => workspaceRef.current?.focus({ preventScroll: true }),
       reveal: (target) => {
         const node = workspaceRef.current;
         if (!node) return;
@@ -299,7 +301,8 @@ export function Canvas() {
     <div
       ref={workspaceRef}
       data-testid="workspace"
-      className="relative h-full w-full overflow-auto bg-workspace"
+      tabIndex={-1}
+      className="relative h-full w-full overflow-auto bg-workspace outline-none"
       style={{ cursor }}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
@@ -335,6 +338,7 @@ export function Canvas() {
           {view.map((el) => (
             <ElementView key={el.id} el={el} mode="edit" editing={el.id === editingId} />
           ))}
+          <InlineEditor />
           {hoverId && !selectedIds.includes(hoverId) && !spaceDown && (
             <HoverOutline elements={elements} id={hoverId} zoom={zoom} />
           )}

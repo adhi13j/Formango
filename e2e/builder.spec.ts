@@ -217,7 +217,7 @@ test.describe('delete and persistence', () => {
   test('the design survives a reload', async ({ page }) => {
     await startBuilder(page);
     await addFromRail(page, 'Fields', /Short text/);
-    await expect(page.getByRole('status')).toHaveText('Saved');
+    await expect(page.getByTestId('save-status')).toHaveText('Saved');
     await page.reload();
     await expect(elements(page)).toHaveCount(1);
     await expect(page.getByRole('radio', { name: /Mobile form/ })).toHaveCount(0);
@@ -226,7 +226,7 @@ test.describe('delete and persistence', () => {
   test('a corrupted saved design loads a blank page without crashing', async ({ page }) => {
     await startBuilder(page);
     await addFromRail(page, 'Fields', /Short text/);
-    await expect(page.getByRole('status')).toHaveText('Saved');
+    await expect(page.getByTestId('save-status')).toHaveText('Saved');
     await page.evaluate(
       () =>
         new Promise<void>((resolve, reject) => {

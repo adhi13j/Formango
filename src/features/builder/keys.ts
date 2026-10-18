@@ -13,3 +13,13 @@ export const isMac = (): boolean =>
 export function hasModifier(event: { metaKey: boolean; ctrlKey: boolean }): boolean {
   return isMac() ? event.metaKey : event.ctrlKey;
 }
+
+/** Buttons, links, and menu items keep Enter and Space for activating themselves. */
+export function isActivatable(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false;
+  return (
+    target.closest(
+      'button, a[href], summary, [role="button"], [role="menuitem"], [role="switch"], [role="radio"], [role="option"]',
+    ) !== null
+  );
+}

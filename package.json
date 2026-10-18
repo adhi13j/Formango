@@ -13,10 +13,11 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "check:fast": "npm run lint && npm run typecheck && npm run test",
-    "check": "npm run check:fast && npm run check:contrast && npm run build && npm run test:e2e",
+    "check": "npm run check:fast && npm run check:contrast && npm run build && npm run test:e2e && npm run test:perf",
     "test:watch": "vitest",
-    "test:e2e": "playwright test",
-    "check:contrast": "node scripts/check-contrast.ts"
+    "test:e2e": "playwright test --project=chromium --project=firefox",
+    "check:contrast": "node scripts/check-contrast.ts",
+    "test:perf": "playwright test --project=perf --workers=1"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",

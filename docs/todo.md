@@ -157,12 +157,12 @@ Goal: by the end, the owner can open `/builder`, design a form, undo and redo, p
   - **Details:** new element becomes selected and the flyout stays open. Defaults come from the table in `schema.md`. Field `key` is a slug of the label, made unique (`email`, `email-2`). New elements get a readable `name` ("Short text", "Heading"). Respect the 150 element cap with a toast. Uploads: accept PNG, JPG, WebP up to 5 MB; downscale to max 1600px on the long side with a canvas, re-encode (WebP or JPEG 0.85, PNG if transparent), reject if the result is over 1.5 MB, then add as a data URL. Reject SVG with an explanation.
   - **Done when:** each of the 7 fields, 3 text presets, 3 shapes, line, and image can be added by click and by drag, and appear exactly under the drop point.
 
-- [ ] **1.13 Inline text editing**
+- [x] **1.13 Inline text editing**
   - **Do:** double-click a text element (or Enter with it selected) shows an overlay `<textarea>` that matches the element's font, size, color, alignment, line height, and width, auto-growing. Esc or click outside commits. The toolbar stays usable. Double-click a field label edits the label the same way (single line).
   - **Details:** while editing, Moveable is hidden. Empty text commits as "Text" (never leave an invisible element). `Ctrl+Enter` also commits. Pasting strips formatting. Max 2000 chars for text, 120 for labels.
   - **Done when:** edit, commit, undo, and redo work, and the final render has the same line breaks as the editing view within one line.
 
-- [ ] **1.14 Contextual toolbar**
+- [x] **1.14 Contextual toolbar**
   - **Do:** implement every toolbar variant from `layout.md` as small components in `src/features/builder/toolbar/`. Every control updates through `updateElements` so multi-selection edits apply to all selected elements of the same type.
   - **Details:**
     - **Color popover:** 12 default swatches, recent colors, hex input (validate `#RGB` and `#RRGGBB`, normalize to uppercase `#RRGGBB`), "No fill" where allowed, live preview of the current value, adds to recent colors on commit (max 12, deduped).
@@ -177,35 +177,35 @@ Goal: by the end, the owner can open `/builder`, design a form, undo and redo, p
   - **Done when:** every control changes the canvas immediately, is undoable, and works with multi-selection.
   - **Mini-checkpoint B (short stop):** ask the owner to build a small form with the toolbar and report anything awkward.
 
-- [ ] **1.15 Keyboard shortcuts**
+- [x] **1.15 Keyboard shortcuts**
   - **Do:** one hook `useEditorShortcuts` attached at the builder root.
   - **Shortcuts:** Delete/Backspace remove; Ctrl/Cmd+D duplicate; Ctrl/Cmd+Z undo; Ctrl/Cmd+Shift+Z and Ctrl+Y redo; Ctrl/Cmd+C, X, V copy, cut, paste (optional "should have", build last; internal clipboard, paste offset +16 that grows per paste); arrows nudge 1px, Shift+arrows 10px; Ctrl/Cmd+A select all; `[` and `]` layer backward and forward, with Ctrl/Cmd to send to back and front; Enter edit text; Esc cascade (close popover, stop editing, clear selection); `?` opens the shortcut dialog; Ctrl/Cmd +, -, 0, 1 zoom; Space pan.
   - **Details:** ignore shortcuts while focus is in an input, textarea, select, or contenteditable, and while a dialog is open. Prevent the browser default only for shortcuts we handle. Nudging with held arrow keys coalesces into one history entry (commit on keyup). Build the shortcut dialog from the same shortcut list so docs never drift.
   - **Done when:** every shortcut works on Mac and Windows modifier keys and none fire while typing in a toolbar input.
 
-- [ ] **1.16 Layers popover and alignment tools**
+- [x] **1.16 Layers popover and alignment tools**
   - **Do:** layers popover per `layout.md` (select, rename, hide, lock, reorder buttons). Multi-select toolbar (align and distribute are "should have", build after the rest of Phase 1): align left, center, right, top, middle, bottom, and distribute horizontally or vertically (3+ elements).
   - **Done when:** hiding and locking reflect on canvas immediately, renaming persists, and align/distribute produce exact pixel results (covered by the geometry tests from 1.2).
 
-- [ ] **1.17 Templates**
+- [x] **1.17 Templates**
   - **Do:** `src/templates/contact-form.json` and `event-registration.json` (mobile preset, using the theme colors and fields: name, email, message; name, email, ticket type radio, dietary checkboxes, signature). Template card thumbnails render live from the JSON using the same renderers at 0.25 scale.
   - **Details:** templates must validate against the Zod schema (add a test that loads every template JSON). Applying a template replaces the doc after confirm if the current page has elements, and is undoable.
   - **Done when:** both templates look good (header band, spacing on the 20px margin) and are fully editable.
 
-- [ ] **1.18 Preview mode**
+- [x] **1.18 Preview mode**
   - **Do:** the Preview toggle switches `mode` to `preview`. Hide the toolbar, rail, flyout, Moveable, and guides. Show a slim bar with **Desktop | Phone** and **Reset answers** and **Exit preview**.
   - **Details:** Desktop: page centered on `outerBackground` filling the workspace, page keeps its width. Phone: workspace becomes a 390px wide frame with rounded corners. For an A4 form in Phone mode, render **List view** (`layout.md`). Fields are real and interactive and nothing is saved. Esc exits.
   - **Done when:** preview matches the edit view exactly in Desktop mode, and the outer background color shows around a mobile-preset page.
 
-- [ ] **1.19 Empty, error, and loading states**
+- [x] **1.19 Empty, error, and loading states**
   - **Do:** empty-page hint, the save error banner, the unsupported-screen message, toasts for add limits and import errors, error boundary around the canvas so a bad element cannot blank the app.
   - **Done when:** each state can be triggered and looks intentional.
 
-- [ ] **1.20 Accessibility pass for the builder**
+- [x] **1.20 Accessibility pass for the builder**
   - **Do:** tab through the whole shell. Add `aria-label`s, `role="toolbar"` on the contextual toolbar, `aria-live="polite"` for the save status and toasts, focus return after closing popovers and dialogs, visible focus rings. Selected element announces its name and type via a visually hidden live region.
   - **Done when:** a keyboard-only user can add a field, edit its label, move it with arrows, delete it, and undo.
 
-- [ ] **1.21 Tests and performance check**
+- [x] **1.21 Tests and performance check**
   - **Do:** finish unit tests (store, geometry, layoutText, persistence, schema, templates). Add a component test for ElementView in each mode. Add a dev-only "Add 100 elements" menu item (hidden in production builds) and profile dragging with React DevTools and the browser Performance tab.
   - **Done when:** `npm run check` passes. Dragging with 100 elements shows no long tasks over 50ms and no re-render of unselected elements (verify with the React Profiler).
 

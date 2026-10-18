@@ -18,15 +18,12 @@ import {
   zoomTo,
   zoomToFit,
 } from './editorActions';
-import { hasModifier, isTypingTarget } from './keys';
+import { hasModifier, isActivatable, isTypingTarget } from './keys';
 
 /** True while a dialog or popover is open, so Esc and typing keys belong to it. */
 function overlayOpen(): boolean {
-  return (
-    document.querySelector(
-      '[role="dialog"], [role="menu"], [data-radix-popper-content-wrapper], [data-state="open"][role="listbox"]',
-    ) !== null
-  );
+  // Tooltips are not overlays: they reappear when focus returns to a button and must not block keys.
+  return document.querySelector('[role="dialog"], [role="menu"], [role="listbox"]') !== null;
 }
 
 const ARROWS: Record<string, [number, number]> = {
@@ -112,6 +109,7 @@ export function useEditorShortcuts(): void {
         case '[':
           return handled(() => reorderSelection('backward'));
         case 'Enter': {
+          if (isActivatable(event.target)) return;
           const [only] = selectedElements();
           if (
             only &&

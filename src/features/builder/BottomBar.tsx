@@ -17,7 +17,7 @@ import { ConfirmDialog } from './dialogs/ConfirmDialog';
 import { LayersPopover } from './LayersPopover';
 import { formatShortcut } from './shortcuts';
 
-function SizeChip() {
+export function SizeChip() {
   const preset = useDocStore((s) => s.doc.page.preset);
   const [pending, setPending] = useState<PagePreset | null>(null);
   return (

@@ -9,8 +9,14 @@ export default defineConfig({
   reporter: 'list',
   use: { baseURL: `http://localhost:${PORT}`, trace: 'retain-on-failure' },
   projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-    { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
+    { name: 'chromium', testIgnore: /perf\.spec/, use: { ...devices['Desktop Chrome'] } },
+    { name: 'firefox', testIgnore: /perf\.spec/, use: { ...devices['Desktop Firefox'] } },
+    {
+      name: 'perf',
+      testMatch: /perf\.spec/,
+      fullyParallel: false,
+      use: { ...devices['Desktop Chrome'] },
+    },
   ],
   webServer: {
     command: `npm run dev -- --port ${PORT} --strictPort`,
