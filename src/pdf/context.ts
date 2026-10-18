@@ -14,6 +14,8 @@ export interface PdfContext {
   /** Set only in fillable mode. */
   form: PDFForm | null;
   warnings: Set<string>;
+  /** How many entries each repeating group has in this PDF, by element id. */
+  groupRows: Record<string, number>;
 }
 
 export const MISSING_GLYPH_WARNING =

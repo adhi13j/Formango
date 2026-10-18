@@ -7,6 +7,7 @@ import { describeFileRules, formatBytes } from '@/lib/fileTypes';
 import { inputTop, isOptionList, labelHeight } from '@/lib/fields';
 import { layoutText, measureText, truncateToWidth } from '@/lib/text/layoutText';
 import { COLORS } from '@/lib/constants';
+import { GROUP_HEADER, cellField, layoutGroup, parseRows } from '@/lib/groups';
 import type { Answers, FieldElement } from '@/types/doc';
 import type { PdfContext } from './context';
 import { drawPictureContained } from './drawImage';
@@ -333,6 +334,9 @@ async function addFillableWidgets(ctx: PdfContext, el: FieldElement): Promise<vo
       }
       return;
     }
+    case 'group':
+      // Each cell of a group is added as its own widget while the group is drawn.
+      return;
     case 'signature':
     case 'file':
       // pdf-lib cannot create these, so they stay drawn boxes with a hint.
@@ -340,6 +344,49 @@ async function addFillableWidgets(ctx: PdfContext, el: FieldElement): Promise<vo
     default: {
       const unreachable: never = el.fieldType;
       return unreachable;
+    }
+  }
+}
+
+// ---- repeating groups -------------------------------------------------------------------------
+
+/** A repeating group: one bordered card per entry, each cell drawn like a normal field. */
+async function drawGroup(ctx: PdfContext, el: FieldElement, value: Value): Promise<void> {
+  const s = el.inputStyle;
+  const ls = el.labelStyle;
+  const filled = ctx.mode === 'filled';
+  const rows = parseRows(typeof value === 'string' ? value : undefined);
+  const count = ctx.groupRows[el.id] ?? 0;
+  const layout = layoutGroup(el, count);
+  if (count === 0) {
+    await drawMutedHint(
+      ctx,
+      { ...el, y: el.y + inputTop(ls.fontSize) - 8, height: 56 },
+      `No ${el.itemLabel.toLowerCase()} added`,
+    );
+    return;
+  }
+  for (const [rowIndex, row] of layout.rows.entries()) {
+    const top = el.y + row.y;
+    drawBox(ctx, {
+      rect: { x: el.x, y: top, width: el.width, height: row.height },
+      fill: null,
+      stroke: s.stroke,
+      strokeWidth: 1,
+      radius: s.radius + 4,
+    });
+    await drawRun(ctx, {
+      text: `${el.itemLabel} ${rowIndex + 1}`,
+      x: el.x + FIELD_PAD_X,
+      baseline: baselineIn(top, GROUP_HEADER, ls.fontFamily, ls.fontSize, ls.fontWeight),
+      fontId: ls.fontFamily,
+      weight: ls.fontWeight,
+      size: ls.fontSize,
+      color: ls.color,
+    });
+    for (const cell of row.cells) {
+      const pseudo = cellField(el, rowIndex, cell, { x: el.x, y: top });
+      await drawField(ctx, pseudo, filled ? rows[rowIndex]?.[cell.column.id] : undefined);
     }
   }
 }
@@ -405,6 +452,10 @@ export async function drawField(ctx: PdfContext, el: FieldElement, value: Value)
       drawInputBox(ctx, el);
       await drawBoxText(ctx, el, answer, 0);
       break;
+    }
+    case 'group': {
+      await drawGroup(ctx, el, value);
+      return;
     }
     case 'radio':
     case 'checkbox':

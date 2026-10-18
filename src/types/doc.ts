@@ -70,12 +70,24 @@ export interface ImageElement extends BaseElement {
 }
 
 export type FieldType =
-  'text' | 'longtext' | 'dropdown' | 'checkbox' | 'radio' | 'date' | 'signature' | 'file';
+  'text' | 'longtext' | 'dropdown' | 'checkbox' | 'radio' | 'date' | 'signature' | 'file' | 'group';
 
 /** What a file field accepts. Each kind maps to a list of extensions in `lib/fileTypes.ts`. */
 export type FileKind = 'image' | 'pdf' | 'document' | 'spreadsheet';
 
 export type FieldValidation = 'none' | 'email' | 'phone' | 'number';
+
+export type GroupColumnType = 'text' | 'number' | 'date' | 'dropdown' | 'radio';
+
+/** One question inside a repeating group (for example "Name" in a family member list). */
+export interface GroupColumn {
+  id: string;
+  label: string;
+  type: GroupColumnType;
+  required: boolean;
+  /** dropdown and radio only */
+  options: string[];
+}
 
 export interface LabelStyle {
   fontFamily: FontId;
@@ -108,6 +120,17 @@ export interface FieldElement extends BaseElement {
   fileKinds: FileKind[];
   /** File fields only: largest file in whole megabytes. */
   maxFileMb: number;
+  /** Group fields only: the questions asked for each entry. */
+  columns: GroupColumn[];
+  /** Group fields only: what one entry is called, for example "Person". */
+  itemLabel: string;
+  /** Group fields only: the text on the button that adds an entry. */
+  addLabel: string;
+  /** Group fields only: fewest and most entries a respondent can have. */
+  minRows: number;
+  maxRows: number;
+  /** Group fields only: questions side by side in each entry (1 or 2). */
+  perRow: 1 | 2;
   labelStyle: LabelStyle;
   inputStyle: InputStyle;
 }

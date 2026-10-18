@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { AnswerValue } from '@/components/elements/types';
-import { cleanAnswers, errorOrder, validateAnswers, validateField } from '@/lib/answers';
+import { cleanAnswers, errorOrder, validateAnswers, validateFieldAll } from '@/lib/answers';
 import { clearAnswerFiles } from '@/lib/fileAnswers';
 import { logError } from '@/lib/logError';
 import type { ResponsesRepo } from '@/lib/repo/responsesRepo';
@@ -22,17 +22,29 @@ interface FillFormProps {
 
 type Status = 'filling' | 'sending' | 'done';
 
-function withError(
-  errors: Record<string, string>,
-  id: string,
-  message: string | null,
+const belongsTo = (key: string, fieldId: string) =>
+  key === fieldId || key.startsWith(`${fieldId}.`);
+
+/**
+ * Replaces what is known about one field's errors. `all` shows every new error; `existing` only
+ * keeps errors that are already on screen (so a freshly added, still empty entry in a group does
+ * not light up until the person submits).
+ */
+function mergeErrors(
+  current: Record<string, string>,
+  fieldId: string,
+  fresh: Record<string, string>,
+  mode: 'all' | 'existing',
 ): Record<string, string> {
-  if (message === null) {
-    if (!(id in errors)) return errors;
-    const { [id]: _removed, ...rest } = errors;
-    return rest;
-  }
-  return errors[id] === message ? errors : { ...errors, [id]: message };
+  const kept = Object.fromEntries(
+    Object.entries(current).filter(([key]) => !belongsTo(key, fieldId)),
+  );
+  const wanted = Object.entries(fresh).filter(([key]) => mode === 'all' || key in current);
+  const next = { ...kept, ...Object.fromEntries(wanted) };
+  const same =
+    Object.keys(next).length === Object.keys(current).length &&
+    Object.entries(next).every(([key, message]) => current[key] === message);
+  return same ? current : next;
 }
 
 /**
@@ -73,11 +85,12 @@ export function FillForm({ doc, repo, onDownload }: FillFormProps) {
       const field: FieldElement | undefined = fields.get(id);
       if (!field) return;
       // Once a field shows an error (or the person tried to submit), fix it as they type.
-      setErrors((current) =>
-        id in current || attempted.current
-          ? withError(current, id, validateField(field, value))
-          : current,
-      );
+      setErrors((current) => {
+        const hasError = Object.keys(current).some((key) => belongsTo(key, id));
+        if (!hasError && !attempted.current) return current;
+        const mode = field.fieldType === 'group' ? 'existing' : 'all';
+        return mergeErrors(current, id, validateFieldAll(field, value), mode);
+      });
     },
     [fields],
   );
@@ -86,7 +99,11 @@ export function FillForm({ doc, repo, onDownload }: FillFormProps) {
     const node = rootRef.current?.querySelector<HTMLElement>(`[data-element-id="${id}"]`);
     if (!node) return;
     node.scrollIntoView({ block: 'center' });
-    (node.querySelector<HTMLElement>(FOCUSABLE) ?? node).focus({ preventScroll: true });
+    const target =
+      node.querySelector<HTMLElement>('[aria-invalid="true"]') ??
+      node.querySelector<HTMLElement>(FOCUSABLE) ??
+      node;
+    target.focus({ preventScroll: true });
   };
 
   const handleBlur = (event: React.FocusEvent<HTMLDivElement>) => {
@@ -94,10 +111,24 @@ export function FillForm({ doc, repo, onDownload }: FillFormProps) {
     const id = holder?.getAttribute('data-element-id');
     const field = id ? fields.get(id) : undefined;
     if (!id || !field) return;
-    // Moving between the options of one radio group is not leaving the field.
     const next = event.relatedTarget as HTMLElement | null;
+    const cellId = (event.target as HTMLElement)
+      .closest('[data-cell-id]')
+      ?.getAttribute('data-cell-id');
+    if (cellId) {
+      // Leaving one cell of a group only checks that cell. (Moving inside it is not leaving.)
+      if (next?.closest(`[data-cell-id="${cellId}"]`)) return;
+      const fresh = validateFieldAll(field, answersRef.current[id]);
+      setErrors((current) => {
+        const { [cellId]: _old, ...rest } = current;
+        return fresh[cellId] ? { ...rest, [cellId]: fresh[cellId] } : rest;
+      });
+      return;
+    }
+    // Moving between the options of one radio group is not leaving the field.
     if (next?.closest(`[data-element-id="${id}"]`)) return;
-    setErrors((current) => withError(current, id, validateField(field, answersRef.current[id])));
+    const fresh = validateFieldAll(field, answersRef.current[id]);
+    setErrors((current) => mergeErrors(current, id, fresh, 'all'));
   };
 
   const submit = async () => {
@@ -114,7 +145,9 @@ export function FillForm({ doc, repo, onDownload }: FillFormProps) {
     const first = order[0];
     if (first !== undefined) {
       setAnnouncement(
-        `${order.length} ${order.length === 1 ? 'field needs' : 'fields need'} attention. ${found[first] ?? ''}`,
+        `${order.length} ${order.length === 1 ? 'field needs' : 'fields need'} attention. ${
+          Object.entries(found).find(([key]) => belongsTo(key, first))?.[1] ?? ''
+        }`,
       );
       focusField(first);
       return;

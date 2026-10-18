@@ -3,6 +3,8 @@ import {
   COLORS,
   MAX_ELEMENTS,
   MAX_FILE_MB,
+  MAX_GROUP_COLUMNS,
+  MAX_GROUP_ROWS,
   MAX_IMAGE_BYTES,
   MAX_LABEL_LENGTH,
   MAX_OPTIONS,
@@ -101,6 +103,7 @@ const fieldElement = z.object({
     'date',
     'signature',
     'file',
+    'group',
   ]),
   key: z.string().min(1).max(60),
   label: z.string().max(MAX_LABEL_LENGTH),
@@ -110,6 +113,22 @@ const fieldElement = z.object({
   options: z.array(z.string().min(1).max(MAX_LABEL_LENGTH)).max(MAX_OPTIONS),
   fileKinds: z.array(z.enum(['image', 'pdf', 'document', 'spreadsheet'])).max(4),
   maxFileMb: z.number().int().min(1).max(MAX_FILE_MB),
+  columns: z
+    .array(
+      z.object({
+        id: z.string().min(1).max(40),
+        label: z.string().max(MAX_LABEL_LENGTH),
+        type: z.enum(['text', 'number', 'date', 'dropdown', 'radio']),
+        required: z.boolean(),
+        options: z.array(z.string().min(1).max(MAX_LABEL_LENGTH)).max(MAX_OPTIONS),
+      }),
+    )
+    .max(MAX_GROUP_COLUMNS),
+  itemLabel: z.string().max(40),
+  addLabel: z.string().max(40),
+  minRows: z.number().int().min(0).max(MAX_GROUP_ROWS),
+  maxRows: z.number().int().min(1).max(MAX_GROUP_ROWS),
+  perRow: z.union([z.literal(1), z.literal(2)]),
   labelStyle: z.object({
     fontFamily: fontId,
     fontSize: z.number().min(8).max(120),
@@ -200,12 +219,21 @@ export function migrate(raw: unknown): unknown {
  * Older drafts kept the submit button's look in `page.submit` and had no button element, and
  * file fields did not exist. Fill in what the schema now requires before validating.
  */
+const GROUP_DEFAULTS = {
+  columns: [],
+  itemLabel: 'Item',
+  addLabel: 'Add item',
+  minRows: 0,
+  maxRows: 10,
+  perRow: 1,
+};
+
 function withSubmitButton(raw: unknown): unknown {
   if (typeof raw !== 'object' || raw === null || !('elements' in raw)) return raw;
   if (!Array.isArray(raw.elements)) return raw;
   const elements: unknown[] = raw.elements.map((el: unknown) => {
     if (typeof el !== 'object' || el === null || !('type' in el) || el.type !== 'field') return el;
-    return { fileKinds: [], maxFileMb: 5, ...el };
+    return { fileKinds: [], maxFileMb: 5, ...GROUP_DEFAULTS, ...el };
   });
   return { ...raw, elements };
 }

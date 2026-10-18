@@ -18,6 +18,8 @@ export interface ElementViewProps {
   error?: string | undefined;
   /** Called with undefined when the answer becomes empty. Must be a stable function. */
   onAnswer?: ((id: string, value: AnswerValue | undefined) => void) | undefined;
+  /** Repeating groups only: errors of single cells, keyed by cell id. */
+  cellErrors?: Record<string, string> | undefined;
   /** Called when the submit button is pressed in preview and fill modes. Must be stable. */
   onSubmit?: (() => void) | undefined;
   /** Hide the text because an in-place editor is drawn on top of it. */

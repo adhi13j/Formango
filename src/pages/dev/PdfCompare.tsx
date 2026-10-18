@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ElementView } from '@/components/elements/ElementView';
 import type { AnswerValue } from '@/components/elements/types';
 import { loadFonts, fontsUsedBy } from '@/lib/fonts';
+import { applyGroupRows, groupRowCounts, layoutGroup, stringifyRows } from '@/lib/groups';
 import { displayHeight } from '@/lib/geometry';
 import { inputTop } from '@/lib/fields';
 import { exportPdf } from '@/pdf/exportPdf';
@@ -73,6 +74,12 @@ function sampleAnswers(doc: FormDoc): Answers {
       case 'file':
         answers[el.id] = 'cv.pdf';
         break;
+      case 'group':
+        answers[el.id] = stringifyRows([
+          { c1: 'Asha Rao', c2: 'Mother', c3: 'Living' },
+          { c1: 'Ravi Rao', c2: 'Father', c3: 'Deceased' },
+        ]);
+        break;
     }
   }
   return answers;
@@ -82,9 +89,23 @@ function sampleAnswers(doc: FormDoc): Answers {
  * Parts of a field the screen and the PDF draw differently on purpose (native date format,
  * browser text wrapping, signature pad chrome, placeholders). The comparison skips them.
  */
-function ignoredAreas(doc: FormDoc, filled: boolean): Rect[] {
+function ignoredAreas(doc: FormDoc, filled: boolean, counts: Record<string, number>): Rect[] {
   const areas: Rect[] = [];
   for (const el of doc.elements) {
+    if (el.type === 'field' && el.fieldType === 'group') {
+      // Skip every input box inside the entries: the cards, titles, and labels are still compared.
+      for (const row of layoutGroup(el, counts[el.id] ?? 0).rows) {
+        for (const cell of row.cells) {
+          areas.push({
+            x: el.x + cell.x - 1,
+            y: el.y + row.y + cell.y + inputTop(el.labelStyle.fontSize) - 1,
+            width: cell.width + 2,
+            height: cell.height - inputTop(el.labelStyle.fontSize) + 2,
+          });
+        }
+      }
+      continue;
+    }
     if (el.type === 'button') areas.push({ x: el.x, y: el.y, width: el.width, height: el.height });
     if (el.type !== 'field') continue;
     const top = inputTop(el.labelStyle.fontSize);
@@ -135,22 +156,37 @@ export default function PdfCompare() {
   // Text is laid out with real font widths, so nothing is drawn before the fonts are in.
   const [fontsReady, setFontsReady] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [doc] = useState<FormDoc | null>(() => {
+  const [source] = useState<FormDoc | null>(() => {
     if (docName === 'kitchen-sink-mobile') return kitchenSink('mobile');
     if (docName === 'kitchen-sink-a4') return kitchenSink('a4');
     return TEMPLATES.find((t) => t.id === docName)?.doc ?? null;
   });
   const [answers] = useState<Record<string, AnswerValue>>(() =>
-    doc && filled ? sampleAnswers(doc) : {},
+    source && filled ? sampleAnswers(source) : {},
   );
+  // A blank PDF shows three empty entries in each group, so the screen side shows three too.
+  const [screenAnswers, doc, counts] = useMemo(() => {
+    if (!source) return [answers, null, {}] as const;
+    const shown: Record<string, AnswerValue> = { ...answers };
+    if (!filled) {
+      for (const el of source.elements) {
+        if (el.type === 'field' && el.fieldType === 'group') {
+          const n = Math.min(el.maxRows, Math.max(el.minRows, 3));
+          shown[el.id] = stringifyRows(Array.from({ length: n }, () => ({})));
+        }
+      }
+    }
+    const rowCounts = groupRowCounts(source, shown);
+    return [shown, applyGroupRows(source, rowCounts), rowCounts] as const;
+  }, [source, answers, filled]);
 
   useEffect(() => {
-    if (!doc) return;
+    if (!source || !doc) return;
     let cancelled = false;
     void (async () => {
-      await loadFonts(fontsUsedBy(doc));
+      await loadFonts(fontsUsedBy(source));
       setFontsReady(true);
-      const result = await exportPdf(doc, filled ? answers : null, {
+      const result = await exportPdf(source, filled ? answers : null, {
         mode: fillable ? 'fillable' : 'filled',
       });
       const pdfjs = await import('pdfjs-dist');
@@ -170,7 +206,7 @@ export default function PdfCompare() {
       window.__compare = {
         width: doc.page.width,
         height: Math.round(displayHeight(doc)),
-        ignore: ignoredAreas(doc, filled),
+        ignore: ignoredAreas(doc, filled, counts),
         warnings: result.warnings,
         bytes: result.bytes.length,
       };
@@ -179,9 +215,9 @@ export default function PdfCompare() {
     return () => {
       cancelled = true;
     };
-  }, [doc, filled, fillable, answers]);
+  }, [source, doc, counts, filled, fillable, answers]);
 
-  if (!doc) return <p>Unknown doc "{docName}"</p>;
+  if (!source || !doc) return <p>Unknown doc "{docName}"</p>;
   const height = Math.round(displayHeight(doc));
   return (
     <main
@@ -210,7 +246,7 @@ export default function PdfCompare() {
             key={el.id}
             el={el}
             mode="fill"
-            value={el.type === 'field' ? answers[el.id] : undefined}
+            value={el.type === 'field' ? screenAnswers[el.id] : undefined}
           />
         ))}
       </div>

@@ -1,4 +1,5 @@
 import { fontsUsedBy, loadFonts } from '@/lib/fonts';
+import { applyGroupRows, groupRowCounts } from '@/lib/groups';
 import type { Answers, DocElement, FormDoc } from '@/types/doc';
 import type { PdfContext, PdfMode } from './context';
 import { drawField } from './drawField';
@@ -7,6 +8,8 @@ import { drawLineElement, drawBox, drawPageBackground } from './drawShapes';
 import { drawTextElement } from './drawText';
 import { FontSet } from './pdfFonts';
 import { pdfGeometry } from './units';
+
+const BLANK_GROUP_ROWS = 3;
 
 export interface ExportOptions {
   mode: PdfMode;
@@ -63,19 +66,31 @@ async function drawElement(
  * on first use so it stays out of the main bundle.
  */
 export async function exportPdf(
-  doc: FormDoc,
+  source: FormDoc,
   answers: Answers | null,
   options: ExportOptions = { mode: 'filled' },
 ): Promise<ExportResult> {
   const [{ PDFDocument }, fontkitModule] = await Promise.all([
     import('pdf-lib'),
     import('@pdf-lib/fontkit'),
-    loadFonts(fontsUsedBy(doc)),
+    loadFonts(fontsUsedBy(source)),
   ]);
   const pdf = await PDFDocument.create();
   pdf.registerFontkit(fontkitModule.default);
-  pdf.setTitle(doc.title);
+  pdf.setTitle(source.title);
   pdf.setCreator('Formango');
+  // Groups take the height of their entries, and what is below them moves. A blank PDF (no
+  // answers, or a fillable one) shows a few empty entries to write in.
+  const blankRows = (group: { minRows: number; maxRows: number }) =>
+    Math.min(group.maxRows, Math.max(group.minRows, BLANK_GROUP_ROWS));
+  const groupRows: Record<string, number> = {};
+  for (const el of source.elements) {
+    if (el.type === 'field' && el.fieldType === 'group') groupRows[el.id] = blankRows(el);
+  }
+  if (answers && options.mode === 'filled') {
+    Object.assign(groupRows, groupRowCounts(source, answers));
+  }
+  const doc = applyGroupRows(source, groupRows);
   const g = pdfGeometry(doc);
   const page = pdf.addPage([g.width, g.height]);
   const ctx: PdfContext = {
@@ -87,6 +102,7 @@ export async function exportPdf(
     mode: options.mode,
     form: options.mode === 'fillable' ? pdf.getForm() : null,
     warnings: new Set(),
+    groupRows,
   };
 
   drawPageBackground(ctx, doc.page.background);

@@ -1,4 +1,5 @@
-import { useLayoutEffect, useRef, useState } from 'react';
+import { applyGroupRows, groupRowCounts, splitCellId } from '@/lib/groups';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { ElementView } from '@/components/elements/ElementView';
 import type { AnswerValue } from '@/components/elements/types';
 import { byReadingOrder, displayHeight } from '@/lib/geometry';
@@ -37,7 +38,18 @@ export function FormView({ doc, mode, answers, errors, onAnswer, onSubmit }: For
     return () => observer.disconnect();
   }, []);
 
-  const { page } = doc;
+  // Groups grow as entries are added, and everything below them moves with them.
+  const view = useMemo(() => applyGroupRows(doc, groupRowCounts(doc, answers)), [doc, answers]);
+  const cellErrors = useMemo(() => {
+    const byGroup: Record<string, Record<string, string>> = {};
+    for (const [key, message] of Object.entries(errors ?? {})) {
+      const cell = splitCellId(key);
+      if (!cell) continue;
+      (byGroup[cell.groupId] ??= {})[key] = message;
+    }
+    return byGroup;
+  }, [errors]);
+  const { page } = view;
   const phone = width > 0 && width < PHONE_BREAKPOINT;
   const useList = phone && page.preset === 'a4';
   let body: React.ReactNode = null;
@@ -63,9 +75,9 @@ export function FormView({ doc, mode, answers, errors, onAnswer, onSubmit }: For
     const scale = phone
       ? Math.min(PHONE_SCALE_MAX, Math.max(PHONE_SCALE_MIN, available / page.width))
       : Math.min(1, available / page.width);
-    const contentHeight = displayHeight(doc);
+    const contentHeight = displayHeight(view);
     const pageHeight = contentHeight;
-    const ordered = [...doc.elements].sort(byReadingOrder);
+    const ordered = [...view.elements].sort(byReadingOrder);
     body = (
       <div style={{ padding: phone ? 0 : `${SIDE_GUTTER}px 0` }}>
         <div style={{ width: page.width * scale, height: pageHeight * scale, margin: '0 auto' }}>
@@ -88,6 +100,7 @@ export function FormView({ doc, mode, answers, errors, onAnswer, onSubmit }: For
                 mode={mode}
                 value={answers[el.id]}
                 error={errors?.[el.id]}
+                cellErrors={cellErrors[el.id]}
                 onAnswer={onAnswer}
                 onSubmit={onSubmit}
               />

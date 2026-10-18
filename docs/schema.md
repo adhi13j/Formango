@@ -89,7 +89,9 @@ export interface ImageElement extends BaseElement {
 }
 
 export type FieldType =
-  | 'text' | 'longtext' | 'dropdown' | 'checkbox' | 'radio' | 'date' | 'signature' | 'file';
+  | 'text' | 'longtext' | 'dropdown' | 'checkbox' | 'radio' | 'date' | 'signature' | 'file' | 'group';
+export type GroupColumnType = 'text' | 'number' | 'date' | 'dropdown' | 'radio';
+export interface GroupColumn { id: string; label: string; type: GroupColumnType; required: boolean; options: string[] }
 export type FileKind = 'image' | 'pdf' | 'document' | 'spreadsheet';
 
 export interface FieldElement extends BaseElement {
@@ -104,6 +106,12 @@ export interface FieldElement extends BaseElement {
   options: string[];             // dropdown, radio, checkbox. 1 to 50 items, unique
   fileKinds: FileKind[];         // file only. Empty means any supported kind. Extensions per kind: lib/fileTypes.ts
   maxFileMb: number;             // file only. 1 to 25, default 5
+  columns: GroupColumn[];        // group only: the questions asked in each entry (1 to 8)
+  itemLabel: string;             // group only: "Person" (entry titles read "Person 1", "Person 2")
+  addLabel: string;              // group only: "Add person"
+  minRows: number;               // group only: 0 to 30
+  maxRows: number;               // group only: 1 to 30, default 10
+  perRow: 1 | 2;                 // group only: questions side by side in an entry
   labelStyle: { fontFamily: FontId; fontSize: number; fontWeight: 400 | 700; color: string };
   inputStyle: {
     fontFamily: FontId; fontSize: number; textColor: string;
@@ -133,6 +141,7 @@ A field is **one element** containing a label and an input area. They move and r
 - `labelHeight = round(labelStyle.fontSize * 1.3)`, then a **6px gap**, then the input area.
 - `text`, `longtext`, `dropdown`, `date`: input area is a rounded box filling the rest of the element.
 - `signature`: input area is a dashed box. Respondents draw with mouse, finger, or trackpad, **type** their name in a script font, or **upload** an image of a signature. All three produce one PNG. Min height 120.
+- `group` (repeating group, "Add person"): the field holds a list of small forms. The designer sets the questions once (`columns`). Respondents press the add button to get another copy and can remove entries. The element's stored height is the height of **one sample entry plus the add button** (`groupDesignHeight`, computed like radio heights, so only the width can be resized). On the fill page and in the PDF the group takes the height of its real entries and **everything that starts below it moves down** (or up) by the difference (`applyGroupRows`); items beside or above it stay. A fixed A4 page grows to fit, and the PDF page grows with it. Each question is drawn as a normal field (`cellField`), so labels, required marks, validation, green borders, and PDF drawing are shared.
 - `file`: input area is a dashed box with an upload icon, the allowed types, and the size limit. After a file is chosen it shows the file name, size, and a remove button. Rejects wrong types and oversize files with a message.
 - `radio` and `checkbox`: input area is a vertical list of options, **32px per row**. When `options` or font size changes, **recompute `height`** automatically (`labelHeight + 6 + options.length * 32`). A single "I agree" checkbox is a field with one option.
 - Minimum sizes: width 80, height = label + 6 + 32 for single-box fields. For radio/checkbox the height is always computed from the row count (32px per row), so it has no separate minimum.
@@ -150,6 +159,7 @@ A field is **one element** containing a label and an input area. They move and r
 | checkbox | 350 x 88 | 350 x 88 | 2 options (18 + 6 + 2 x 32) |
 | date | 350 x 72 | 350 x 72 | Label "Date" |
 | signature | 350 x 144 | 350 x 144 | Label "Signature" (18 + 6 + 120 minimum box) |
+| group | full width x about 276 | full width x about 276 | Label "Family members", questions Name, Relationship, Status; "Add person" |
 | file | 350 x 96 | 350 x 96 | Label "Upload a file", images and PDF, 5 MB |
 | button | 350 x 48 | 714 x 48 (240 wide in templates) | "Submit", mango fill, ink text, radius 12. Mobile: 80px above the page bottom (page height minus 80 minus 48). A4: at the bottom margin |
 | rect shape | 350 x 120 | 714 x 120 | Fill mango-100, no stroke, radius 12 |
@@ -186,6 +196,7 @@ export type Answers = Record<string, string | string[]>;   // key = FieldElement
 | date | `string`, ISO `YYYY-MM-DD` |
 | checkbox | `string[]` of selected option labels |
 | signature | `string`, PNG data URL, max about 60 KB (draw on a 400 x 150 canvas) |
+| group | `string`, a JSON list of entries keyed by column id, for example `[{"c1":"Asha","c2":"Mother","c3":"Living"}]`. Empty entries and cells are dropped when a response is stored |
 | file | `string`, the file name. The bytes are kept beside the answers in memory in Phase 2 and uploaded to Storage in Phase 3 |
 
 Empty answers are **omitted**, not stored as empty strings. Validate required fields, `email`, `phone` (7 to 15 digits, allow `+ - ( )` and spaces), `number`, and max length (text 200, longtext 2000).

@@ -71,7 +71,8 @@ function PositionPopover({ el }: { el: DocElement }) {
   const heightLocked =
     (el.type === 'text' && el.autoHeight) ||
     el.type === 'line' ||
-    (el.type === 'field' && (el.fieldType === 'radio' || el.fieldType === 'checkbox'));
+    (el.type === 'field' &&
+      (el.fieldType === 'radio' || el.fieldType === 'checkbox' || el.fieldType === 'group'));
   const update = (patch: Partial<DocElement>) => useDocStore.getState().updateElement(el.id, patch);
   return (
     <Popover>

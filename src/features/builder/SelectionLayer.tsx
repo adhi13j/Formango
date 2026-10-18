@@ -56,7 +56,10 @@ const WIDTH_ONLY = ['w', 'e'];
 function directionsFor(el: DocElement): string[] {
   if (el.type === 'text' && el.autoHeight) return WIDTH_ONLY;
   if (el.type === 'line') return WIDTH_ONLY;
-  if (el.type === 'field' && (el.fieldType === 'radio' || el.fieldType === 'checkbox')) {
+  if (
+    el.type === 'field' &&
+    (el.fieldType === 'radio' || el.fieldType === 'checkbox' || el.fieldType === 'group')
+  ) {
     return WIDTH_ONLY;
   }
   return ALL_DIRECTIONS;

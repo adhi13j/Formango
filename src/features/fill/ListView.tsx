@@ -1,5 +1,6 @@
 import { ElementView } from '@/components/elements/ElementView';
 import type { AnswerValue } from '@/components/elements/types';
+import { layoutGroup, parseRows, splitCellId } from '@/lib/groups';
 import { byReadingOrder } from '@/lib/geometry';
 import { textContentHeight } from '@/lib/normalize';
 import type { DocElement, FormDoc } from '@/types/doc';
@@ -18,7 +19,11 @@ interface ListViewProps {
 }
 
 /** One element laid out for a single column: full width, own height, positioned at the origin. */
-function toColumn(el: DocElement, width: number): DocElement | null {
+function toColumn(
+  el: DocElement,
+  width: number,
+  answers: Record<string, AnswerValue>,
+): DocElement | null {
   switch (el.type) {
     case 'shape':
     case 'line':
@@ -35,7 +40,12 @@ function toColumn(el: DocElement, width: number): DocElement | null {
         width,
         height: Math.round((el.height * width) / Math.max(1, el.width)),
       };
-    case 'field':
+    case 'field': {
+      const sized = { ...el, x: 0, y: 0, width };
+      if (el.fieldType !== 'group') return sized;
+      const rows = parseRows(answers[el.id]).length;
+      return { ...sized, height: layoutGroup(sized, Math.min(rows, el.maxRows)).height };
+    }
     case 'button':
       return { ...el, x: 0, y: 0, width };
     default: {
@@ -45,13 +55,22 @@ function toColumn(el: DocElement, width: number): DocElement | null {
   }
 }
 
+function cellErrorsFor(
+  errors: Record<string, string> | undefined,
+  groupId: string,
+): Record<string, string> | undefined {
+  if (!errors) return undefined;
+  const mine = Object.entries(errors).filter(([key]) => splitCellId(key)?.groupId === groupId);
+  return mine.length > 0 ? Object.fromEntries(mine) : undefined;
+}
+
 /** A4 forms on phones: the same elements, one per row, top to bottom. Shapes and lines are skipped. */
 export function ListView({ doc, width, mode, answers, errors, onAnswer, onSubmit }: ListViewProps) {
   const column = [...doc.elements]
     .filter((el) => !el.hidden)
     .sort(byReadingOrder)
     .flatMap((el) => {
-      const next = toColumn(el, width);
+      const next = toColumn(el, width, answers);
       return next ? [next] : [];
     });
   return (
@@ -71,6 +90,7 @@ export function ListView({ doc, width, mode, answers, errors, onAnswer, onSubmit
             mode={mode}
             value={answers[el.id]}
             error={errors?.[el.id]}
+            cellErrors={cellErrorsFor(errors, el.id)}
             onAnswer={onAnswer}
             onSubmit={onSubmit}
           />

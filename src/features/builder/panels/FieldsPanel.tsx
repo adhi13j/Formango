@@ -4,6 +4,7 @@ import {
   CheckSquare,
   ChevronDownSquare,
   CircleDot,
+  ListPlus,
   PenLine,
   Type,
   Upload,
@@ -45,6 +46,12 @@ const FIELDS: { type: FieldType; title: string; hint: string; icon: ReactNode }[
     title: 'File upload',
     hint: 'Photo, PDF, or document',
     icon: <Upload size={20} />,
+  },
+  {
+    type: 'group',
+    title: 'Repeating group',
+    hint: 'Add person, add item, any number',
+    icon: <ListPlus size={20} />,
   },
 ];
 

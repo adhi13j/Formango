@@ -99,7 +99,7 @@ When a rail item is clicked, a **flyout panel (280px)** slides out beside the ra
 
 ### Rail panels
 
-**Fields**: a list of 8 cards (icon, name, one-line hint): Short text, Long text, Dropdown, Checkbox, Radio, Date, Signature, File upload. Click to add at viewport center, or drag onto the page.
+**Fields**: a list of 9 cards (icon, name, one-line hint): Short text, Long text, Dropdown, Checkbox, Radio, Date, Signature, File upload, Repeating group. Click to add at viewport center, or drag onto the page.
 
 **Elements**:
 - *Text*: three big presets: Heading, Subheading, Body. Click or drag to add.
@@ -116,6 +116,7 @@ When a rail item is clicked, a **flyout panel (280px)** slides out beside the ra
 |---|---|
 | **Nothing** | Page color swatch, Outer background swatch, Size preset menu, Layout grid toggle (shows the columns and snaps to them) |
 | **Submit button** | Button text, fill, text color, font, size, corner radius, then Arrange, Lock, Position. No Duplicate or Delete |
+| **Repeating group** | Label, Required, **Questions** (entry name, add button text, fewest and most entries, two per line, and the list of questions with type, required, choices, reorder, remove), Style, then the common actions |
 | **File upload field** | Label, Required, File rules (allowed kinds, largest file), Placeholder, Style, then the common actions |
 | **Text** | Font family, size stepper, color, bold, align (3 buttons), line height popover, **\|** layer menu, duplicate, delete, lock, Position popover |
 | **Field** | Label (inline input), required toggle, type-specific button (Options… for dropdown, radio, checkbox; Placeholder… for text, longtext, dropdown; Validation select for text), **Style popover** (label font, label color, input fill, border color, border width, radius, text color), **\|** layer, duplicate, delete, lock, Position |

@@ -25,6 +25,7 @@ function renderBody(props: ElementViewProps, el: DocElement) {
           mode={props.mode}
           value={props.value}
           error={props.error}
+          cellErrors={props.cellErrors}
           onAnswer={props.onAnswer}
           editing={props.editing}
         />

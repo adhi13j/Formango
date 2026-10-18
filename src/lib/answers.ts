@@ -1,3 +1,4 @@
+import { cellField, isRowEmpty, parseRows, stringifyRows } from '@/lib/groups';
 import type { AnswerValue } from '@/components/elements/types';
 import { byReadingOrder } from '@/lib/geometry';
 import type { Answers, FieldElement, FormDoc } from '@/types/doc';
@@ -11,6 +12,8 @@ const PHONE_CHARS = /^[+\d\s\-()]+$/;
 const NUMBER = /^-?\d+([.,]\d+)?$/;
 const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
 const SIGNATURE_URL = /^data:image\/png;base64,[A-Za-z0-9+/=]+$/;
+
+type Value = AnswerValue | undefined;
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -108,6 +111,8 @@ export function validateField(field: FieldElement, value: AnswerValue | undefine
     case 'file':
       // The type and size were checked when the file was picked (lib/fileTypes.ts).
       return typeof value === 'string' ? null : 'Upload a file';
+    case 'group':
+      return groupLevelError(field, value);
     default: {
       const unreachable: never = field.fieldType;
       return unreachable;
@@ -115,7 +120,42 @@ export function validateField(field: FieldElement, value: AnswerValue | undefine
   }
 }
 
-/** Errors keyed by element id, for every visible field that fails. */
+function groupLevelError(field: FieldElement, value: Value): string | null {
+  const filled = parseRows(typeof value === 'string' ? value : undefined).filter(
+    (row) => !isRowEmpty(row),
+  ).length;
+  const needed = Math.max(field.minRows, field.required ? 1 : 0);
+  if (filled >= needed) return null;
+  return needed === 1
+    ? `Add at least one ${field.itemLabel.toLowerCase()}`
+    : `Add at least ${needed} ${field.itemLabel.toLowerCase()} entries`;
+}
+
+/**
+ * Every error for one field. Most fields have at most one, under their own id. A repeating group
+ * can also have errors in single cells, keyed `groupId.row.columnId`.
+ */
+export function validateFieldAll(field: FieldElement, value: Value): Record<string, string> {
+  if (field.fieldType !== 'group') {
+    const message = validateField(field, value);
+    return message ? { [field.id]: message } : {};
+  }
+  const errors: Record<string, string> = {};
+  if (field.hidden) return errors;
+  const whole = groupLevelError(field, value);
+  if (whole) errors[field.id] = whole;
+  const rows = parseRows(typeof value === 'string' ? value : undefined);
+  rows.forEach((row, rowIndex) => {
+    for (const column of field.columns) {
+      const cell = cellField(field, rowIndex, { column, x: 0, y: 0, width: 1, height: 1 });
+      const message = validateField(cell, row[column.id]);
+      if (message) errors[cell.id] = message;
+    }
+  });
+  return errors;
+}
+
+/** Errors keyed by element id (or cell id inside groups), for every visible field that fails. */
 export function validateAnswers(
   doc: Pick<FormDoc, 'elements'>,
   answers: Record<string, AnswerValue>,
@@ -123,8 +163,7 @@ export function validateAnswers(
   const errors: Record<string, string> = {};
   for (const el of doc.elements) {
     if (el.type !== 'field') continue;
-    const message = validateField(el, answers[el.id]);
-    if (message) errors[el.id] = message;
+    Object.assign(errors, validateFieldAll(el, answers[el.id]));
   }
   return errors;
 }
@@ -135,7 +174,11 @@ export function errorOrder(
   errors: Record<string, string>,
 ): string[] {
   return doc.elements
-    .filter((el) => el.type === 'field' && errors[el.id] !== undefined)
+    .filter(
+      (el) =>
+        el.type === 'field' &&
+        Object.keys(errors).some((key) => key === el.id || key.startsWith(`${el.id}.`)),
+    )
     .sort(byReadingOrder)
     .map((el) => el.id);
 }
@@ -153,6 +196,19 @@ export function cleanAnswers(
     if (el.type !== 'field' || el.hidden) continue;
     const value = answers[el.id];
     if (isEmptyAnswer(value) || value === undefined) continue;
+    if (el.fieldType === 'group') {
+      const rows = parseRows(typeof value === 'string' ? value : undefined)
+        .filter((row) => !isRowEmpty(row))
+        .map((row) =>
+          Object.fromEntries(
+            Object.entries(row)
+              .map(([key, cell]) => [key, cell.trim()] as const)
+              .filter(([, cell]) => cell !== ''),
+          ),
+        );
+      if (rows.length > 0) clean[el.id] = stringifyRows(rows);
+      continue;
+    }
     clean[el.id] = typeof value === 'string' ? value.trim() : value;
   }
   return clean;

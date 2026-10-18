@@ -1,3 +1,4 @@
+import { PRESETS } from '@/lib/constants';
 import { displayHeight, type Rect } from '@/lib/geometry';
 import type { FormDoc } from '@/types/doc';
 
@@ -19,7 +20,9 @@ export interface PdfPageGeometry {
  */
 export function pdfGeometry(doc: Pick<FormDoc, 'page' | 'elements'>): PdfPageGeometry {
   const scale = PDF_PAGE_WIDTH / doc.page.width;
-  const height = doc.page.preset === 'a4' ? PDF_A4_HEIGHT : displayHeight(doc) * scale;
+  // An A4 form is one A4 page, unless repeating groups made it longer than that.
+  const grown = doc.page.height > PRESETS.a4.height;
+  const height = doc.page.preset === 'a4' && !grown ? PDF_A4_HEIGHT : displayHeight(doc) * scale;
   return { scale, width: PDF_PAGE_WIDTH, height };
 }
 

@@ -1,5 +1,6 @@
 import { nanoid } from 'nanoid';
 import { COLORS, DEFAULT_FILE_MB, DEFAULT_FONT, PRESETS } from '@/lib/constants';
+import { groupDesignHeight } from '@/lib/groups';
 import { describeFileRules } from '@/lib/fileTypes';
 import { optionListHeight } from '@/lib/fields';
 import { slugify, uniqueSlug } from '@/lib/slug';
@@ -8,6 +9,7 @@ import type {
   FieldElement,
   FieldType,
   FormDoc,
+  GroupColumn,
   ImageElement,
   LineElement,
   PageSettings,
@@ -43,6 +45,7 @@ const FIELD_LABELS: Record<FieldType, { label: string; name: string }> = {
   date: { label: 'Date', name: 'Date' },
   signature: { label: 'Signature', name: 'Signature' },
   file: { label: 'Upload a file', name: 'File upload' },
+  group: { label: 'Family members', name: 'Repeating group' },
 };
 
 export const FIELD_TYPES = Object.keys(FIELD_LABELS) as FieldType[];
@@ -87,6 +90,32 @@ function textElement(
   };
 }
 
+/** A new repeating group asks for a family member's name, relationship, and whether they are living. */
+function groupDefaults(fieldType: FieldType) {
+  const isGroup = fieldType === 'group';
+  const columns: GroupColumn[] = isGroup
+    ? [
+        { id: 'c1', label: 'Name', type: 'text', required: true, options: [] },
+        { id: 'c2', label: 'Relationship', type: 'text', required: true, options: [] },
+        {
+          id: 'c3',
+          label: 'Status',
+          type: 'dropdown',
+          required: false,
+          options: ['Living', 'Deceased'],
+        },
+      ]
+    : [];
+  return {
+    columns,
+    itemLabel: isGroup ? 'Person' : 'Item',
+    addLabel: isGroup ? 'Add person' : 'Add item',
+    minRows: 0,
+    maxRows: 10,
+    perRow: 1 as const,
+  };
+}
+
 function fieldElement(
   page: PageSettings,
   doc: Pick<FormDoc, 'elements'>,
@@ -98,19 +127,23 @@ function fieldElement(
       ? ['Option 1', 'Option 2']
       : [];
   const fullWidth =
-    fieldType === 'longtext' ? contentWidth(page) : Math.min(350, contentWidth(page));
+    fieldType === 'longtext' || fieldType === 'group'
+      ? contentWidth(page)
+      : Math.min(350, contentWidth(page));
   const height =
     fieldType === 'longtext'
       ? 140
       : fieldType === 'signature'
         ? 144
-        : fieldType === 'file'
-          ? 96
-          : fieldType === 'radio' || fieldType === 'checkbox'
-            ? optionListHeight(14, options.length)
-            : 72;
+        : fieldType === 'group'
+          ? 0 // set below from the columns
+          : fieldType === 'file'
+            ? 96
+            : fieldType === 'radio' || fieldType === 'checkbox'
+              ? optionListHeight(14, options.length)
+              : 72;
   const taken = new Set(doc.elements.flatMap((el) => (el.type === 'field' ? [el.key] : [])));
-  return {
+  const field: FieldElement = {
     ...baseOf(page, name, height, fullWidth),
     type: 'field',
     fieldType,
@@ -125,6 +158,7 @@ function fieldElement(
     options,
     fileKinds: fieldType === 'file' ? ['image', 'pdf'] : [],
     maxFileMb: DEFAULT_FILE_MB,
+    ...groupDefaults(fieldType),
     labelStyle: { fontFamily: DEFAULT_FONT, fontSize: 14, fontWeight: 700, color: COLORS.ink },
     inputStyle: {
       fontFamily: DEFAULT_FONT,
@@ -136,6 +170,7 @@ function fieldElement(
       radius: 8,
     },
   };
+  return fieldType === 'group' ? { ...field, height: groupDesignHeight(field) } : field;
 }
 
 function shapeElement(

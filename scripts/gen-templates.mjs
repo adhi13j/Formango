@@ -31,7 +31,7 @@ const text = (id, name, t, x, y, w, o = {}) => {
   };
 };
 
-const HEIGHTS = { text: 72, date: 72, dropdown: 72, longtext: 140, signature: 144, file: 96 };
+const HEIGHTS = { text: 72, date: 72, dropdown: 72, longtext: 140, signature: 144, file: 96, group: 276 };
 const rows = (n) => 24 + 32 * n;
 const KIND_LABELS = { image: 'Images', pdf: 'PDF', document: 'Documents', spreadsheet: 'Spreadsheets' };
 const fileHint = (o) => `${(o.fileKinds?.length ? o.fileKinds : Object.keys(KIND_LABELS)).map((k) => KIND_LABELS[k]).join(', ')} up to ${o.maxFileMb ?? 5} MB`;
@@ -40,6 +40,8 @@ const field = (id, key, fieldType, label, x, y, w, o = {}) => ({
   type: 'field', fieldType, key, label, placeholder: o.placeholder ?? (fieldType === 'file' ? fileHint(o) : ''), required: o.required ?? false,
   validation: o.validation ?? 'none', options: o.options ?? [],
   fileKinds: o.fileKinds ?? [], maxFileMb: o.maxFileMb ?? 5,
+  columns: o.columns ?? [], itemLabel: o.itemLabel ?? 'Item', addLabel: o.addLabel ?? 'Add item',
+  minRows: o.minRows ?? 0, maxRows: o.maxRows ?? 10, perRow: o.perRow ?? 1,
   labelStyle: { fontFamily: o.labelFont ?? 'dm-sans', fontSize: 14, fontWeight: 700, color: o.labelColor ?? C.ink },
   inputStyle: {
     fontFamily: o.inputFont ?? 'dm-sans', fontSize: 16, textColor: o.inputText ?? C.ink, fill: o.inputFill ?? C.white,
@@ -245,21 +247,32 @@ const proposal = (() => {
   one('e-mode', 'premium-mode', 'radio', 'How will you pay?', { required: true, options: ['Yearly', 'Half-yearly', 'Quarterly', 'Monthly'] });
   one('e-existing', 'existing-cover', 'text', 'Existing life policies (insurer and cover)', { placeholder: 'Write "none" if none' });
 
-  section('f', '5. Nominee', 'Who receives the benefit.');
+  section('fam', '5. Family details', 'Add each close family member, including those who have passed away.');
+  one('fam-list', 'family-members', 'group', 'Family members', {
+    itemLabel: 'Person', addLabel: 'Add person', minRows: 0, maxRows: 12, perRow: 2,
+    columns: [
+      { id: 'c1', label: 'Name', type: 'text', required: true, options: [] },
+      { id: 'c2', label: 'Relationship', type: 'dropdown', required: true, options: ['Father', 'Mother', 'Spouse', 'Son', 'Daughter', 'Brother', 'Sister'] },
+      { id: 'c3', label: 'Status', type: 'dropdown', required: true, options: ['Living', 'Deceased'] },
+      { id: 'c4', label: 'Age (or age at death)', type: 'number', required: false, options: [] },
+    ],
+  });
+
+  section('f', '6. Nominee', 'Who receives the benefit.');
   pair(['f-name', 'nominee-name', 'text', 'Nominee name', { required: true }], ['f-rel', 'nominee-relationship', 'text', 'Relationship', { required: true }]);
   pair(['f-dob', 'nominee-dob', 'date', 'Nominee date of birth', { required: true }], ['f-share', 'nominee-share', 'text', 'Share (%)', { validation: 'number' }]);
 
-  section('g', '6. Health', 'Honest answers keep claims simple later.');
+  section('g', '7. Health', 'Honest answers keep claims simple later.');
   pair(['g-height', 'height-cm', 'text', 'Height (cm)', { validation: 'number' }], ['g-weight', 'weight-kg', 'text', 'Weight (kg)', { validation: 'number' }]);
   one('g-tob', 'tobacco', 'radio', 'Do you use tobacco or alcohol?', { required: true, options: ['No', 'Tobacco', 'Alcohol', 'Both'] });
   one('g-cond', 'conditions', 'checkbox', 'Any of these now or before?', { options: ['Diabetes', 'High blood pressure', 'Heart condition', 'Cancer', 'Surgery in last 5 years', 'None of these'] });
   one('g-note', 'health-notes', 'longtext', 'Details, medicines, or hospital stays', { height: 100 });
 
-  section('h', '7. Premium payment');
+  section('h', '8. Premium payment');
   pair(['h-bank', 'bank-name', 'text', 'Bank name', {}], ['h-ifsc', 'ifsc', 'text', 'IFSC code', {}]);
   one('h-cheque', 'cancelled-cheque', 'file', 'Cancelled cheque or passbook page', { fileKinds: ['image', 'pdf'], maxFileMb: 5 });
 
-  section('i', '8. Your confirmation');
+  section('i', '9. Your confirmation');
   one('i-ok', 'declaration', 'checkbox', 'Declaration', { required: true, options: ['I confirm these details are true'], height: 56 });
   one('i-sign', 'signature', 'signature', 'Signature', { required: true });
   one('i-date', 'date-signed', 'date', 'Date', { required: true });

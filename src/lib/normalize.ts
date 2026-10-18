@@ -5,8 +5,10 @@ import {
   MIN_SHAPE_SIZE,
   MIN_TEXT_WIDTH,
   MIN_BUTTON_HEIGHT,
+  MIN_GROUP_WIDTH,
   MIN_WIDTH,
 } from '@/lib/constants';
+import { groupDesignHeight } from '@/lib/groups';
 import { isOptionList, minFieldHeight, optionListHeight } from '@/lib/fields';
 import { clampToPage } from '@/lib/geometry';
 import { ensureSubmitButton } from '@/lib/submitButton';
@@ -67,10 +69,16 @@ function enforceSizes(el: DocElement): DocElement {
           ? ['Option 1']
           : el.options;
       const withOptions = options === el.options ? el : { ...el, options };
-      const width = Math.max(MIN_WIDTH, withOptions.width);
-      const height = isOptionList(withOptions.fieldType)
-        ? optionListHeight(withOptions.labelStyle.fontSize, withOptions.options.length)
-        : Math.max(minFieldHeight(withOptions), withOptions.height);
+      const width = Math.max(
+        withOptions.fieldType === 'group' ? MIN_GROUP_WIDTH : MIN_WIDTH,
+        withOptions.width,
+      );
+      const height =
+        withOptions.fieldType === 'group'
+          ? groupDesignHeight(withOptions)
+          : isOptionList(withOptions.fieldType)
+            ? optionListHeight(withOptions.labelStyle.fontSize, withOptions.options.length)
+            : Math.max(minFieldHeight(withOptions), withOptions.height);
       return { ...withOptions, width, height };
     }
     case 'button':
@@ -116,7 +124,10 @@ export function minSizeOf(el: DocElement): { width: number; height: number } {
     case 'line':
       return { width: MIN_LINE_WIDTH, height: el.thickness };
     case 'field':
-      return { width: MIN_WIDTH, height: minFieldHeight(el) };
+      return {
+        width: el.fieldType === 'group' ? MIN_GROUP_WIDTH : MIN_WIDTH,
+        height: el.fieldType === 'group' ? groupDesignHeight(el) : minFieldHeight(el),
+      };
     case 'button':
       return { width: MIN_WIDTH, height: MIN_BUTTON_HEIGHT };
     default: {

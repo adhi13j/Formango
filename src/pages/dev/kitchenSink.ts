@@ -146,6 +146,7 @@ export function kitchenSink(preset: PagePreset): FormDoc {
     'field-date',
     'field-signature',
     'field-file',
+    'field-group',
   ] as const) {
     const base = make(kind, { x, width: Math.min(wide, 350) });
     const options = base.type === 'field' && base.options.length ? ['One', 'Two', 'Three'] : [];

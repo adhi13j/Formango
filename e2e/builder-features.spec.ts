@@ -176,3 +176,88 @@ test.describe('signature field', () => {
     await expect(page.getByRole('button', { name: 'Clear' })).toBeVisible();
   });
 });
+
+test.describe('repeating group (Add person)', () => {
+  async function previewGroup(page: Page) {
+    await startBuilder(page);
+    await addFromRail(page, 'Fields', /Repeating group/);
+    await page.getByRole('button', { name: 'Preview' }).click();
+  }
+
+  test('shows a sample entry and the add button in the editor', async ({ page }) => {
+    await startBuilder(page);
+    await addFromRail(page, 'Fields', /Repeating group/);
+    await expect(page.getByText('Person 1')).toBeVisible();
+    await expect(page.getByText('Add person')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Delete' })).toBeVisible();
+  });
+
+  test('Add person adds entries with their own questions, and Remove takes one away', async ({
+    page,
+  }) => {
+    await previewGroup(page);
+    await expect(page.getByLabel(/^Name/)).toHaveCount(0);
+    await page.getByRole('button', { name: 'Add person' }).click();
+    await page.getByRole('button', { name: 'Add person' }).click();
+    await expect(page.getByLabel(/^Name/)).toHaveCount(2);
+    await expect(page.getByText('Person 2')).toBeVisible();
+    await page.getByRole('button', { name: 'Remove Person 1' }).click();
+    await expect(page.getByLabel(/^Name/)).toHaveCount(1);
+    await expect(page.getByText('Person 1')).toBeVisible();
+  });
+
+  test('moves the submit button down as entries are added', async ({ page }) => {
+    await previewGroup(page);
+    const submit = page.getByRole('button', { name: 'Submit' });
+    const before = (await submit.boundingBox())?.y ?? 0;
+    await page.getByRole('button', { name: 'Add person' }).click();
+    const after = (await submit.boundingBox())?.y ?? 0;
+    expect(after).toBeGreaterThan(before + 150);
+  });
+
+  test('reports a missing required question in the entry and accepts it once filled', async ({
+    page,
+  }) => {
+    await previewGroup(page);
+    await page.getByRole('button', { name: 'Add person' }).click();
+    await page.waitForTimeout(2100);
+    await page.getByRole('button', { name: 'Submit' }).click();
+    await expect(page.getByText('This field is required', { exact: true })).toHaveCount(2);
+    await page.getByLabel(/^Name/).fill('Asha');
+    await page.getByLabel(/^Relationship/).fill('Mother');
+    await expect(page.getByText('This field is required', { exact: true })).toHaveCount(0);
+    await page.getByRole('button', { name: 'Submit' }).click();
+    await expect(page.getByRole('heading', { name: 'That worked' })).toBeVisible();
+  });
+
+  test('the Questions popover edits the button text and adds a question', async ({ page }) => {
+    await startBuilder(page);
+    await addFromRail(page, 'Fields', /Repeating group/);
+    await page.getByRole('button', { name: 'Group questions' }).click();
+    const addText = page.getByLabel('Add button text');
+    await addText.fill('Add relative');
+    await addText.press('Enter');
+    await page.getByRole('button', { name: 'Add question' }).click();
+    await expect(page.getByLabel('Label of question 4')).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page.getByText('Add relative')).toBeVisible();
+  });
+
+  test('the PDF lists every entry', async ({ page }) => {
+    await previewGroup(page);
+    for (let i = 0; i < 2; i += 1) {
+      await page.getByRole('button', { name: 'Add person' }).click();
+    }
+    const names = page.getByLabel(/^Name/);
+    await names.nth(0).fill('Asha');
+    await names.nth(1).fill('Ravi');
+    const rel = page.getByLabel(/^Relationship/);
+    await rel.nth(0).fill('Mother');
+    await rel.nth(1).fill('Father');
+    await page.waitForTimeout(2100);
+    await page.getByRole('button', { name: 'Submit' }).click();
+    const download = page.waitForEvent('download');
+    await page.getByRole('button', { name: 'Download my copy (PDF)' }).click();
+    expect((await download).suggestedFilename()).toMatch(/\.pdf$/);
+  });
+});

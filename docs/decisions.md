@@ -110,3 +110,15 @@ Consequences: `layoutText` (task 1.3) measures per-character advances with geome
 | `/dev/pdf-compare` is dev-only. `pdfjs-dist`, `pixelmatch`, and `pngjs` are dev dependencies | Needed only for the visual test |
 | The ₹ sign is not in the form fonts, so templates write "Rs". Missing characters become `?` in the PDF with a warning toast | Fonts are Latin only (`CLAUDE.md`) |
 | New template "Insurance proposal info" (mobile, 8 sections, file uploads, signature). It is a neutral information sheet for a Development Officer to key into ANANDA, with no insurer branding. Exported copies are in `exports/` | Owner request |
+
+## 2026-10-18: Repeating groups
+
+| Decision | Reason |
+|---|---|
+| New field type `group` ("Add person"). The designer defines the questions once; respondents add as many entries as they like | Owner: the ANANDA family details screen. A fixed canvas cannot hold an unknown number of fields, so entries are rows inside one element |
+| The element keeps a stored height for one sample entry and the add button. Real heights come from `layoutGroup`, and `applyGroupRows` moves everything that starts below a group | Keeps the canvas model (absolute positions in document px) and the single JSON source of truth. Items beside or above a group do not move |
+| A group's answer is a JSON string of entries keyed by column id, so `Answers` stays `string \| string[]` | No change to the answers type, storage, or CSV plumbing. Parsed with a tolerant `parseRows` |
+| Questions inside entries are drawn by the normal field renderers and PDF code through `cellField` | One implementation of labels, validation messages, green borders, and PDF drawing |
+| Errors inside a group use ids like `groupId.row.columnId`. A new empty entry does not show errors until submit | Leaving an empty new entry alone should not look like a mistake until the person sends the form |
+| A fixed A4 page and its PDF grow when groups make the content longer | Better than clipping or silently overlapping. Proper pagination is still a later improvement |
+| Blank and fillable PDFs show three empty entries per group (or the fewest allowed if more). Fillable cells are real form fields named `<key>__<row>__<column id>` | A paper copy needs room to write several people |

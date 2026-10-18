@@ -4,6 +4,7 @@ import { inputTop, isOptionList, labelHeight } from '@/lib/fields';
 import { measureText, truncateToWidth } from '@/lib/text/layoutText';
 import type { FieldElement } from '@/types/doc';
 import { FieldInput } from './FieldInputs';
+import { GroupView } from './GroupView';
 import { fontStack, type AnswerValue, type ElementMode } from './types';
 
 interface FieldViewProps {
@@ -13,9 +14,19 @@ interface FieldViewProps {
   error: string | undefined;
   onAnswer: ((id: string, value: AnswerValue | undefined) => void) | undefined;
   editing: boolean | undefined;
+  /** Repeating groups only: errors of single cells, keyed by cell id. */
+  cellErrors?: Record<string, string> | undefined;
 }
 
-export function FieldView({ el, mode, value, error, onAnswer, editing }: FieldViewProps) {
+export function FieldView({
+  el,
+  mode,
+  value,
+  error,
+  onAnswer,
+  editing,
+  cellErrors,
+}: FieldViewProps) {
   const ls = el.labelStyle;
   const interactive = mode !== 'edit';
   const labelId = `lbl-${el.id}`;
@@ -35,7 +46,11 @@ export function FieldView({ el, mode, value, error, onAnswer, editing }: FieldVi
   );
   const lineHeight = labelHeight(ls.fontSize);
   const top = inputTop(ls.fontSize);
-  const useLabelTag = interactive && !isOptionList(el.fieldType) && el.fieldType !== 'signature';
+  const useLabelTag =
+    interactive &&
+    !isOptionList(el.fieldType) &&
+    el.fieldType !== 'signature' &&
+    el.fieldType !== 'group';
   const Label = useLabelTag ? 'label' : 'div';
 
   return (
@@ -67,17 +82,21 @@ export function FieldView({ el, mode, value, error, onAnswer, editing }: FieldVi
           </span>
         )}
       </Label>
-      <div style={{ position: 'absolute', left: 0, right: 0, top, bottom: 0 }}>
-        <FieldInput
-          el={el}
-          inputId={inputId}
-          value={value}
-          error={showError ? error : undefined}
-          describedBy={showError ? errorId : undefined}
-          interactive={interactive}
-          onChange={(next) => onAnswer?.(el.id, next)}
-        />
-      </div>
+      {el.fieldType === 'group' ? (
+        <GroupView el={el} mode={mode} value={value} cellErrors={cellErrors} onAnswer={onAnswer} />
+      ) : (
+        <div style={{ position: 'absolute', left: 0, right: 0, top, bottom: 0 }}>
+          <FieldInput
+            el={el}
+            inputId={inputId}
+            value={value}
+            error={showError ? error : undefined}
+            describedBy={showError ? errorId : undefined}
+            interactive={interactive}
+            onChange={(next) => onAnswer?.(el.id, next)}
+          />
+        </div>
+      )}
       {showError && (
         <p
           id={errorId}

@@ -9,6 +9,8 @@ export const MAX_IMAGE_BYTES = 1_500_000;
 export const MAX_DOC_BYTES = 4_000_000;
 export const MAX_FILE_MB = 25;
 export const DEFAULT_FILE_MB = 5;
+export const MAX_GROUP_COLUMNS = 8;
+export const MAX_GROUP_ROWS = 30;
 
 export const SNAP_THRESHOLD_PX = 6;
 export const ZOOM_MIN = 0.25;
@@ -20,6 +22,7 @@ export const MIN_WIDTH = 80;
 export const MIN_TEXT_WIDTH = 40;
 export const MIN_SHAPE_SIZE = 8;
 export const MIN_BUTTON_HEIGHT = 32;
+export const MIN_GROUP_WIDTH = 200;
 export const MIN_IMAGE_SIZE = 24;
 export const MIN_LINE_WIDTH = 20;
 export const AUTO_HEIGHT_PADDING = 80;

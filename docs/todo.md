@@ -283,6 +283,8 @@ Goal: by the end, the owner can open `/builder`, design a form, undo and redo, p
 
 ---
 
+- [x] **2.11 Repeating group field** (owner request: ANANDA family details with "Add person"): `group` field type, `lib/groups.ts` layout and reflow, `GroupView`, Questions editor, validation per entry, PDF entries, template section, tests
+
 # Phase 3: Accounts, sharing, responses
 
 - [ ] **3.1 Supabase project**
