@@ -58,7 +58,7 @@ A single-column, top-to-bottom version of the same form:
 - Text uses its own font, color, and alignment, scaled to fit (never below 14px).
 - Fields render full width with the field's own label and input styles.
 - Background uses the page background. The outer area uses the outer background.
-- Submit button is sticky at the bottom, safe-area aware.
+- The Submit button is part of the page (see Fill page).
 - The answers and the PDF are identical to the Page view.
 
 ---
@@ -99,7 +99,7 @@ When a rail item is clicked, a **flyout panel (280px)** slides out beside the ra
 
 ### Rail panels
 
-**Fields**: a list of 7 cards (icon, name, one-line hint): Short text, Long text, Dropdown, Checkbox, Radio, Date, Signature. Click to add at viewport center, or drag onto the page.
+**Fields**: a list of 8 cards (icon, name, one-line hint): Short text, Long text, Dropdown, Checkbox, Radio, Date, Signature, File upload. Click to add at viewport center, or drag onto the page.
 
 **Elements**:
 - *Text*: three big presets: Heading, Subheading, Body. Click or drag to add.
@@ -114,7 +114,9 @@ When a rail item is clicked, a **flyout panel (280px)** slides out beside the ra
 
 | Selection | Controls (left to right) |
 |---|---|
-| **Nothing** | Page color swatch, Outer background swatch, Size preset menu, Layout grid toggle, Submit button (label, fill, text color) |
+| **Nothing** | Page color swatch, Outer background swatch, Size preset menu, Layout grid toggle (shows the columns and snaps to them) |
+| **Submit button** | Button text, fill, text color, font, size, corner radius, then Arrange, Lock, Position. No Duplicate or Delete |
+| **File upload field** | Label, Required, File rules (allowed kinds, largest file), Placeholder, Style, then the common actions |
 | **Text** | Font family, size stepper, color, bold, align (3 buttons), line height popover, **\|** layer menu, duplicate, delete, lock, Position popover |
 | **Field** | Label (inline input), required toggle, type-specific button (Options… for dropdown, radio, checkbox; Placeholder… for text, longtext, dropdown; Validation select for text), **Style popover** (label font, label color, input fill, border color, border width, radius, text color), **\|** layer, duplicate, delete, lock, Position |
 | **Shape** | Fill, border color, border width, corner radius (rect), opacity, **\|** layer, duplicate, delete, lock, Position |
@@ -182,7 +184,8 @@ Desktop, mobile-preset form:                Phone:
 ```
 
 - The page renders the **same element renderers** as the builder, in `fill` mode.
-- Submit is **not a design element**. The app renders it below the last element, styled from `page.submit` (label, fill, text color), which the designer edits in Page settings. In Page view it sits inside the page under the content, and the page grows to fit it. In List view it is sticky at the bottom. The PDF does not include it.
+- Submit **is a design element** (`type: 'button'`) that every form has exactly once. The designer moves, resizes, and restyles it like anything else, but cannot delete or duplicate it. On Mobile pages it stays last: adding something at or below it slides it down. In List view it is the last item in reading order. The PDF does not include it.
+- A box turns **green** (`leaf-500` border) as soon as it has a valid answer, in Preview and on the fill page. The PDF keeps the designed border.
 - Inline validation: errors appear under the field in berry-700 with an icon, the first invalid field is scrolled into view and focused. Validate on blur, then on change after the first error.
 - Required fields show a red asterisk after the label.
 - After submit: success state replaces the form (check icon, "Thanks, your response was recorded", **Download my copy (PDF)**, "Submit another response").

@@ -55,7 +55,7 @@ Fillable blank PDF, third and fourth templates, keyboard shortcut cheat sheet, m
 Fillable PDF, layout grid, marquee selection, lock and hide, A4 List view, align and distribute. Never cut PDF visual fidelity or the draft/published split.
 
 ### Later / out of scope for v1
-Rotation, grouping, multi-page forms, rich text inside one text box, conditional logic, file-upload fields, custom fonts upload, non-Latin scripts, email notifications, payments, teams and sharing for editing, dark mode, real-time collaboration, A4 pagination of long mobile forms, ads, analytics, CAPTCHA (add Cloudflare Turnstile if spam appears).
+Rotation, grouping, multi-page forms, rich text inside one text box, conditional logic, custom fonts upload, non-Latin scripts, email notifications, payments, teams and sharing for editing, dark mode, real-time collaboration, A4 pagination of long mobile forms, ads, analytics, CAPTCHA (add Cloudflare Turnstile if spam appears).
 
 ---
 

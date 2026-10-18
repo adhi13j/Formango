@@ -81,7 +81,7 @@ Goal: by the end, the owner can open `/builder`, design a form, undo and redo, p
 **Task splitting:** 1.9 (static renderers first, then interactive fields), 1.11 (move and resize, then snapping, then per-type resize rules and multi-select) and 1.14 (toolbar scaffold and color popover, then options editor, then the rest) are each too big for one session. Split them and tick the parts.
 
 - [x] **1.1 Types and schema**
-  - **Do:** create `src/types/doc.ts` exactly as in `docs/schema.md` (note: no `id` and no `recentColors` on `FormDoc`; `page.submit` and `TextElement.role` exist). Create `src/types/doc.schema.ts` (Zod) mirroring it, plus `migrate()` and `createBlankDoc(preset)`.
+  - **Do:** create `src/types/doc.ts` exactly as in `docs/schema.md` (note: no `id` and no `recentColors` on `FormDoc`; `TextElement.role` exists; the Submit button is an element). Create `src/types/doc.schema.ts` (Zod) mirroring it, plus `migrate()` and `createBlankDoc(preset)`.
   - **Details:** constants in `src/lib/constants.ts`: page presets, element defaults table, min sizes (width 80, text min width 40, field min height per `schema.md`), max elements 150, snap threshold 6, zoom range 0.25 to 3, default palette from `theme.md`.
   - **Done when:** unit tests: blank doc validates, a doc with an unknown element type fails, `migrate` returns a valid doc for version 1.
 
@@ -171,7 +171,7 @@ Goal: by the end, the owner can open `/builder`, design a form, undo and redo, p
     - **Options editor (dropdown, radio, checkbox):** popover list with add, remove (min 1), reorder up/down, inline rename, de-duplicate on commit, max 50, and an "Add option" button that focuses the new row. Pasting multiple lines creates multiple options.
     - **Position popover:** X, Y, W, H numeric inputs, clamped, commit on blur or Enter.
     - **Layer menu:** the four operations, disabled when already at the end.
-    - **Page settings (nothing selected):** page color, outer background, preset menu (with the confirm dialog from `layout.md`), grid toggle, and Submit button label, fill, and text color (`page.submit`).
+    - **Page settings (nothing selected):** page color, outer background, preset menu (with the confirm dialog from `layout.md`), and grid toggle. The Submit button is an element with its own toolbar.
     - Controls show **mixed** state when the selection has different values.
     - All icon-only buttons have tooltips and `aria-label`s.
   - **Done when:** every control changes the canvas immediately, is undoable, and works with multi-selection.
@@ -214,6 +214,9 @@ Goal: by the end, the owner can open `/builder`, design a form, undo and redo, p
 
 ---
 
+- [x] **1.23 Owner feedback round 1** (submit button as an element, file upload field with type and size rules, green borders on filled boxes, visible layout grid)
+- [x] **1.24 More templates** (six new designs, generator script, tests, e2e coverage)
+
 # Phase 2: Fill page and PDF export
 
 - [ ] **2.1 Answers state and validation**
@@ -223,13 +226,13 @@ Goal: by the end, the owner can open `/builder`, design a form, undo and redo, p
 
 - [ ] **2.2 Fill page component**
   - **Do:** `src/features/fill/FillForm.tsx` renders Page view or List view (from `layout.md`) based on preset and viewport width (A4 + width under 640 = List view). Reuse `ElementView` in `fill` mode. Keep answers in local state keyed by element id.
-  - **Details:** Page view of a Mobile form on a phone scales to the screen width, clamped 0.85 to 1.15 (`layout.md`). A4 Page view scales down to fit a narrow window (never up). Load only the fonts the doc uses (`loadFonts`). The Submit button uses `page.submit`. List view sorts by `y` then `x`, skips shapes and lines, sticky Submit. Submit is rendered by the app (see `layout.md`). Validate on blur, then on change after the first error, and on submit; focus and scroll to the first error. Honeypot input (visually hidden, `tabindex=-1`, `autocomplete=off`), and block submission faster than 2 seconds after mount. Success screen with "Download my copy (PDF)" and "Submit another response".
+  - **Details:** Page view of a Mobile form on a phone scales to the screen width, clamped 0.85 to 1.15 (`layout.md`). A4 Page view scales down to fit a narrow window (never up). Load only the fonts the doc uses (`loadFonts`). The Submit button is an element (`ButtonView`, already built; pass `onSubmit`). List view sorts by `y` then `x`, skips shapes and lines, and ends with the Submit button. Validate on blur, then on change after the first error, and on submit; focus and scroll to the first error. Honeypot input (visually hidden, `tabindex=-1`, `autocomplete=off`), and block submission faster than 2 seconds after mount. Success screen with "Download my copy (PDF)" and "Submit another response".
   - **Done when:** the form works with keyboard only and on a 390px wide viewport with no horizontal scroll.
 
 - [ ] **2.3 Signature pad**
-  - **Do:** `SignaturePad.tsx` inside the signature field in `fill`/`preview` mode. Pointer Events, canvas scaled by `devicePixelRatio`, smooth strokes (quadratic curves between midpoints), `touch-action: none` on the canvas, Clear button, line color `ink-900`, width 2.5px.
-  - **Details:** logical size 400 x 150, exported with `toDataURL('image/png')` after cropping to the ink bounds with 8px padding and re-scaling down so output stays under about 60 KB. Track `hasInk` so an empty pad counts as no answer. Keyboard users get a text fallback input "Type your name" that renders in the Caveat font as the signature (draw to canvas and export).
-  - **Done when:** drawing is smooth on mouse and touch, Clear works, and the answer is a valid PNG data URL under the size limit.
+  - **Do:** `SignaturePad.tsx` inside the signature field in `fill`/`preview` mode, with three tabs: **Draw**, **Type**, **Upload** (owner request: drawing on a laptop trackpad is awkward). Draw: Pointer Events, canvas scaled by `devicePixelRatio`, smooth strokes (quadratic curves between midpoints), `touch-action: none`, Clear, line `ink-900`, width 2.5px. Type: a text input rendered in Caveat. Upload: PNG, JPEG, or WebP of a signature (scanned or photographed), scaled down.
+  - **Details:** every route ends as one PNG data URL: logical size 400 x 150, cropped to the ink bounds with 8px padding and re-scaled so output stays under about 60 KB (uploads are drawn onto the same canvas, fitted and centered). Track `hasInk` so an empty pad counts as no answer. The field shows the signature with a green border once signed, and a "Change signature" button.
+  - **Done when:** drawing is smooth on mouse and touch, Clear works, typing and uploading produce a signature, and the answer is a valid PNG data URL under the size limit.
 
 - [ ] **2.4 Local submit stub**
   - **Do:** for now, "Submit" saves to `localStorage['formango:builder:responses:v1']` as `{ id, createdAt, answers }[]` through a `ResponsesRepo` interface (`create`, `list`). Phase 3 swaps the implementation to Supabase without touching the UI.
