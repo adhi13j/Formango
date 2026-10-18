@@ -27,7 +27,7 @@ export function selectedElements(): DocElement[] {
 
 export function deleteSelection(): void {
   const ids = selectedElements()
-    .filter((el) => !el.locked)
+    .filter((el) => !el.locked && el.type !== 'button')
     .map((el) => el.id);
   if (ids.length === 0) return;
   useDocStore.getState().removeElements(ids);
@@ -35,7 +35,9 @@ export function deleteSelection(): void {
 }
 
 export function duplicateSelection(): void {
-  const ids = selectedElements().map((el) => el.id);
+  const ids = selectedElements()
+    .filter((el) => el.type !== 'button')
+    .map((el) => el.id);
   if (ids.length === 0) return;
   const copies = useDocStore.getState().duplicateElements(ids);
   if (copies.length < ids.length) toast.error(`A form can have up to ${MAX_ELEMENTS} elements.`);
@@ -44,7 +46,8 @@ export function duplicateSelection(): void {
 
 export function copySelection(): void {
   const els = selectedElements();
-  if (els.length > 0) useUiStore.getState().setClipboard(structuredClone(els));
+  const copyable = els.filter((el) => el.type !== 'button');
+  if (copyable.length > 0) useUiStore.getState().setClipboard(structuredClone(copyable));
 }
 
 export function cutSelection(): void {

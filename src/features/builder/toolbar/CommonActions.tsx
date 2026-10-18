@@ -148,25 +148,31 @@ export function CommonActions({ els }: { els: DocElement[] }) {
   const allLocked = els.every((el) => el.locked);
   const anyLocked = els.some((el) => el.locked);
   const ids = els.map((el) => el.id);
+  // The submit button is part of every form: it can move and restyle, but not go away or double up.
+  const onlySubmit = els.every((el) => el.type === 'button');
   return (
     <>
       <Separator />
       <ArrangeMenu els={els} />
-      <IconButton
-        label="Duplicate"
-        shortcut={formatShortcut('duplicate')}
-        onClick={duplicateSelection}
-      >
-        <Copy size={20} strokeWidth={1.75} />
-      </IconButton>
-      <IconButton
-        label={anyLocked ? 'Locked elements cannot be deleted' : 'Delete'}
-        shortcut={formatShortcut('delete')}
-        disabled={anyLocked}
-        onClick={deleteSelection}
-      >
-        <Trash2 size={20} strokeWidth={1.75} />
-      </IconButton>
+      {!onlySubmit && (
+        <>
+          <IconButton
+            label="Duplicate"
+            shortcut={formatShortcut('duplicate')}
+            onClick={duplicateSelection}
+          >
+            <Copy size={20} strokeWidth={1.75} />
+          </IconButton>
+          <IconButton
+            label={anyLocked ? 'Locked elements cannot be deleted' : 'Delete'}
+            shortcut={formatShortcut('delete')}
+            disabled={anyLocked}
+            onClick={deleteSelection}
+          >
+            <Trash2 size={20} strokeWidth={1.75} />
+          </IconButton>
+        </>
+      )}
       <IconButton
         label={allLocked ? 'Unlock' : 'Lock'}
         pressed={allLocked}

@@ -4,10 +4,12 @@ import {
   MIN_LINE_WIDTH,
   MIN_SHAPE_SIZE,
   MIN_TEXT_WIDTH,
+  MIN_BUTTON_HEIGHT,
   MIN_WIDTH,
 } from '@/lib/constants';
 import { isOptionList, minFieldHeight, optionListHeight } from '@/lib/fields';
 import { clampToPage } from '@/lib/geometry';
+import { ensureSubmitButton } from '@/lib/submitButton';
 import { layoutText } from '@/lib/text/layoutText';
 import type { DocElement, FormDoc, PageSettings, TextElement } from '@/types/doc';
 
@@ -71,6 +73,12 @@ function enforceSizes(el: DocElement): DocElement {
         : Math.max(minFieldHeight(withOptions), withOptions.height);
       return { ...withOptions, width, height };
     }
+    case 'button':
+      return {
+        ...el,
+        width: Math.max(MIN_WIDTH, el.width),
+        height: Math.max(MIN_BUTTON_HEIGHT, el.height),
+      };
     default: {
       const unreachable: never = el;
       return unreachable;
@@ -109,6 +117,8 @@ export function minSizeOf(el: DocElement): { width: number; height: number } {
       return { width: MIN_LINE_WIDTH, height: el.thickness };
     case 'field':
       return { width: MIN_WIDTH, height: minFieldHeight(el) };
+    case 'button':
+      return { width: MIN_WIDTH, height: MIN_BUTTON_HEIGHT };
     default: {
       const unreachable: never = el;
       return unreachable;
@@ -127,5 +137,6 @@ export function normalizeDoc(doc: FormDoc): FormDoc {
     if (next !== el) changed = true;
     return next;
   });
-  return changed ? { ...doc, elements } : doc;
+  const normalized = changed ? { ...doc, elements } : doc;
+  return ensureSubmitButton(normalized);
 }

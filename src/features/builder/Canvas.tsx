@@ -13,6 +13,7 @@ import { hasElementDrag, readDragPayload } from './dragData';
 import { canvasLayout, fitZoom, type Viewport } from './canvasLayout';
 import { registerCanvas } from './canvasBridge';
 import { InlineEditor } from './InlineEditor';
+import { GridOverlay } from './GridOverlay';
 import { SelectionLayer, type LiveGeometry } from './SelectionLayer';
 import { isActivatable, isTypingTarget } from './keys';
 
@@ -32,6 +33,7 @@ export function Canvas() {
   const zoom = useUiStore((s) => s.zoom);
   const fitMode = useUiStore((s) => s.fitMode);
   const editingId = useUiStore((s) => s.editingId);
+  const gridEnabled = useUiStore((s) => s.gridEnabled);
   const selectedIds = useUiStore((s) => s.selectedIds);
   const { page, elements } = doc;
   const height = displayHeight(doc);
@@ -338,6 +340,7 @@ export function Canvas() {
           {view.map((el) => (
             <ElementView key={el.id} el={el} mode="edit" editing={el.id === editingId} />
           ))}
+          {gridEnabled && <GridOverlay doc={{ page }} height={height} />}
           <InlineEditor />
           {hoverId && !selectedIds.includes(hoverId) && !spaceDown && (
             <HoverOutline elements={elements} id={hoverId} zoom={zoom} />

@@ -65,7 +65,7 @@ export const useUiStore = create<UiState>()((set) => ({
   mode: 'edit',
   previewDevice: 'desktop',
   snapEnabled: true,
-  gridEnabled: true,
+  gridEnabled: false,
   clipboard: [],
   pasteCount: 0,
   saveStatus: 'idle',

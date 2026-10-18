@@ -1,14 +1,11 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { ElementView } from '@/components/elements/ElementView';
 import type { AnswerValue } from '@/components/elements/types';
-import { Button } from '@/components/ui/button';
 import { byReadingOrder, displayHeight } from '@/lib/geometry';
 import type { FormDoc } from '@/types/doc';
 import { ListView } from './ListView';
 
 export const PHONE_BREAKPOINT = 640;
-const SUBMIT_HEIGHT = 48;
-const SUBMIT_ZONE = 104;
 const SIDE_GUTTER = 24;
 const PHONE_SCALE_MIN = 0.85;
 const PHONE_SCALE_MAX = 1.15;
@@ -43,22 +40,11 @@ export function FormView({ doc, mode, answers, errors, onAnswer, onSubmit }: For
   const { page } = doc;
   const phone = width > 0 && width < PHONE_BREAKPOINT;
   const useList = phone && page.preset === 'a4';
-  const submit = (
-    <Button
-      type="button"
-      onClick={onSubmit}
-      style={{ background: page.submit.fill, color: page.submit.textColor, height: SUBMIT_HEIGHT }}
-      className="w-full text-base font-bold"
-    >
-      {page.submit.label}
-    </Button>
-  );
-
   let body: React.ReactNode = null;
   if (width > 0 && useList) {
     const listWidth = Math.min(width - 32, 560);
     body = (
-      <div style={{ background: page.background, minHeight: '100%', paddingBottom: 96 }}>
+      <div style={{ background: page.background, minHeight: '100%', paddingBottom: 48 }}>
         <div style={{ width: listWidth, margin: '0 auto', paddingTop: 24 }}>
           <ListView
             doc={doc}
@@ -67,19 +53,8 @@ export function FormView({ doc, mode, answers, errors, onAnswer, onSubmit }: For
             answers={answers}
             errors={errors}
             onAnswer={onAnswer}
+            onSubmit={onSubmit}
           />
-        </div>
-        <div
-          style={{
-            position: 'sticky',
-            bottom: 0,
-            padding: `12px 16px calc(12px + env(safe-area-inset-bottom))`,
-            background: page.background,
-            borderTop: '1px solid var(--border)',
-            marginTop: 24,
-          }}
-        >
-          <div style={{ maxWidth: listWidth, margin: '0 auto' }}>{submit}</div>
         </div>
       </div>
     );
@@ -89,7 +64,7 @@ export function FormView({ doc, mode, answers, errors, onAnswer, onSubmit }: For
       ? Math.min(PHONE_SCALE_MAX, Math.max(PHONE_SCALE_MIN, available / page.width))
       : Math.min(1, available / page.width);
     const contentHeight = displayHeight(doc);
-    const pageHeight = contentHeight + SUBMIT_ZONE;
+    const pageHeight = contentHeight;
     const ordered = [...doc.elements].sort(byReadingOrder);
     body = (
       <div style={{ padding: phone ? 0 : `${SIDE_GUTTER}px 0` }}>
@@ -114,18 +89,9 @@ export function FormView({ doc, mode, answers, errors, onAnswer, onSubmit }: For
                 value={answers[el.id]}
                 error={errors?.[el.id]}
                 onAnswer={onAnswer}
+                onSubmit={onSubmit}
               />
             ))}
-            <div
-              style={{
-                position: 'absolute',
-                left: page.margin,
-                top: contentHeight + 24,
-                width: page.width - page.margin * 2,
-              }}
-            >
-              {submit}
-            </div>
           </div>
         </div>
       </div>

@@ -12,6 +12,10 @@ import {
   unionRect,
 } from '@/lib/geometry';
 import { createBlankDoc } from '@/types/doc.schema';
+import type { FormDoc, PagePreset } from '@/types/doc';
+
+/** A blank page without the submit button, so tests see only the elements they add. */
+const blankPage = (preset: PagePreset): FormDoc => ({ ...createBlankDoc(preset), elements: [] });
 
 const box = (id: string, x: number, y: number, width: number, height: number) => ({
   id,
@@ -54,10 +58,10 @@ describe('rectangles', () => {
 
 describe('displayHeight', () => {
   it('is fixed for A4', () => {
-    expect(displayHeight(createBlankDoc('a4'))).toBe(1123);
+    expect(displayHeight(blankPage('a4'))).toBe(1123);
   });
   it('is at least the minimum for mobile and grows past the lowest visible element', () => {
-    const doc = createBlankDoc('mobile');
+    const doc = blankPage('mobile');
     expect(displayHeight(doc)).toBe(844);
     doc.elements.push({
       id: 'l',

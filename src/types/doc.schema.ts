@@ -2,6 +2,7 @@ import { z } from 'zod';
 import {
   COLORS,
   MAX_ELEMENTS,
+  MAX_FILE_MB,
   MAX_IMAGE_BYTES,
   MAX_LABEL_LENGTH,
   MAX_OPTIONS,
@@ -10,6 +11,7 @@ import {
   PRESETS,
 } from '@/lib/constants';
 import { FONT_IDS } from '@/lib/fonts';
+import { ensureSubmitButton } from '@/lib/submitButton';
 import type { FormDoc, PagePreset } from '@/types/doc';
 
 const hexColor = z
@@ -90,13 +92,24 @@ const imageElement = z.object({
 const fieldElement = z.object({
   ...base,
   type: z.literal('field'),
-  fieldType: z.enum(['text', 'longtext', 'dropdown', 'checkbox', 'radio', 'date', 'signature']),
+  fieldType: z.enum([
+    'text',
+    'longtext',
+    'dropdown',
+    'checkbox',
+    'radio',
+    'date',
+    'signature',
+    'file',
+  ]),
   key: z.string().min(1).max(60),
   label: z.string().max(MAX_LABEL_LENGTH),
   placeholder: z.string().max(MAX_LABEL_LENGTH),
   required: z.boolean(),
   validation: z.enum(['none', 'email', 'phone', 'number']),
   options: z.array(z.string().min(1).max(MAX_LABEL_LENGTH)).max(MAX_OPTIONS),
+  fileKinds: z.array(z.enum(['image', 'pdf', 'document', 'spreadsheet'])).max(4),
+  maxFileMb: z.number().int().min(1).max(MAX_FILE_MB),
   labelStyle: z.object({
     fontFamily: fontId,
     fontSize: z.number().min(8).max(120),
@@ -114,12 +127,25 @@ const fieldElement = z.object({
   }),
 });
 
+const buttonElement = z.object({
+  ...base,
+  type: z.literal('button'),
+  label: z.string().min(1).max(30),
+  fontFamily: fontId,
+  fontSize: z.number().min(8).max(120),
+  fontWeight: weight,
+  textColor: hexColor,
+  fill: hexColor,
+  radius: z.number().min(0).max(200),
+});
+
 const element = z.discriminatedUnion('type', [
   textElement,
   shapeElement,
   lineElement,
   imageElement,
   fieldElement,
+  buttonElement,
 ]);
 
 const pageSettings = z.object({
@@ -130,11 +156,6 @@ const pageSettings = z.object({
   background: hexColor,
   outerBackground: hexColor,
   margin: z.number().int().min(0).max(200),
-  submit: z.object({
-    label: z.string().min(1).max(30),
-    fill: hexColor,
-    textColor: hexColor,
-  }),
 });
 
 export const formDocSchema = z
@@ -175,6 +196,20 @@ export function migrate(raw: unknown): unknown {
   }
 }
 
+/**
+ * Older drafts kept the submit button's look in `page.submit` and had no button element, and
+ * file fields did not exist. Fill in what the schema now requires before validating.
+ */
+function withSubmitButton(raw: unknown): unknown {
+  if (typeof raw !== 'object' || raw === null || !('elements' in raw)) return raw;
+  if (!Array.isArray(raw.elements)) return raw;
+  const elements: unknown[] = raw.elements.map((el: unknown) => {
+    if (typeof el !== 'object' || el === null || !('type' in el) || el.type !== 'field') return el;
+    return { fileKinds: [], maxFileMb: 5, ...el };
+  });
+  return { ...raw, elements };
+}
+
 export type ParseDocResult = { ok: true; doc: FormDoc } | { ok: false; errors: string[] };
 
 function describeIssue(issue: z.core.$ZodIssue): string {
@@ -190,14 +225,14 @@ export function parseDoc(raw: unknown): ParseDocResult {
   } catch (error) {
     return { ok: false, errors: [error instanceof Error ? error.message : 'Unknown version'] };
   }
-  const result = formDocSchema.safeParse(migrated);
-  if (result.success) return { ok: true, doc: result.data };
+  const result = formDocSchema.safeParse(withSubmitButton(migrated));
+  if (result.success) return { ok: true, doc: ensureSubmitButton(result.data) };
   return { ok: false, errors: result.error.issues.slice(0, 5).map(describeIssue) };
 }
 
 export function createBlankDoc(preset: PagePreset = 'mobile'): FormDoc {
   const info = PRESETS[preset];
-  return {
+  return ensureSubmitButton({
     version: CURRENT_DOC_VERSION,
     title: 'Untitled form',
     page: {
@@ -208,8 +243,7 @@ export function createBlankDoc(preset: PagePreset = 'mobile'): FormDoc {
       background: COLORS.white,
       outerBackground: COLORS.cream,
       margin: info.margin,
-      submit: { label: 'Submit', fill: COLORS.mango, textColor: COLORS.ink },
     },
     elements: [],
-  };
+  });
 }

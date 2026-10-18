@@ -2,6 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { createElement } from '@/lib/elements';
 import { buildSnapLines, gridColumns, snapMove, snapResize } from '@/lib/snap';
 import { createBlankDoc } from '@/types/doc.schema';
+import type { FormDoc, PagePreset } from '@/types/doc';
+
+/** A blank page without the submit button, so tests see only the elements they add. */
+const blankPage = (preset: PagePreset): FormDoc => ({ ...createBlankDoc(preset), elements: [] });
 
 const lines = { xs: [0, 100, 200], ys: [0, 50] };
 
@@ -66,7 +70,7 @@ describe('snapResize', () => {
 
 describe('buildSnapLines', () => {
   it('includes page edges, center, margins, and grid columns when enabled', () => {
-    const doc = createBlankDoc('mobile');
+    const doc = blankPage('mobile');
     const withGrid = buildSnapLines(doc, new Set(), true);
     expect(withGrid.xs).toEqual(expect.arrayContaining([0, 195, 390, 20, 370, 190, 200]));
     const noGrid = buildSnapLines(doc, new Set(), false);
@@ -74,14 +78,14 @@ describe('buildSnapLines', () => {
   });
 
   it('has no bottom or middle lines on auto-height pages but does on A4', () => {
-    expect(buildSnapLines(createBlankDoc('mobile'), new Set(), false).ys).toEqual([0, 20]);
-    expect(buildSnapLines(createBlankDoc('a4'), new Set(), false).ys).toEqual(
+    expect(buildSnapLines(blankPage('mobile'), new Set(), false).ys).toEqual([0, 20]);
+    expect(buildSnapLines(blankPage('a4'), new Set(), false).ys).toEqual(
       expect.arrayContaining([561.5, 1123]),
     );
   });
 
   it("adds other elements' edges and centers, skipping hidden and excluded ones", () => {
-    const doc = createBlankDoc('mobile');
+    const doc = blankPage('mobile');
     const a = { ...createElement('rect', doc), id: 'a', x: 50, y: 60, width: 100, height: 40 };
     const b = {
       ...createElement('rect', doc),
@@ -102,14 +106,14 @@ describe('buildSnapLines', () => {
 
 describe('gridColumns', () => {
   it('has the mobile one and two column layout', () => {
-    expect(gridColumns(createBlankDoc('mobile'))).toEqual([
+    expect(gridColumns(blankPage('mobile'))).toEqual([
       [20, 370],
       [20, 190],
       [200, 370],
     ]);
   });
   it('has 12 whole-pixel columns on A4', () => {
-    const columns = gridColumns(createBlankDoc('a4'));
+    const columns = gridColumns(blankPage('a4'));
     expect(columns).toHaveLength(12);
     expect(columns[0]).toEqual([40, 94]);
     expect(columns[11]?.[1]).toBe(754);

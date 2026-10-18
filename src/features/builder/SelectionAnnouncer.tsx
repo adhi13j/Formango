@@ -7,6 +7,7 @@ const TYPE_NAMES = {
   line: 'line',
   image: 'image',
   field: 'field',
+  button: 'button',
 } as const;
 
 /** Visually hidden live region: tells screen reader users what is selected. */

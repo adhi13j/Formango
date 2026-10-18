@@ -1,3 +1,4 @@
+import { ButtonToolbar } from './ButtonToolbar';
 import { FieldToolbar } from './FieldToolbar';
 import {
   AlignTools,
@@ -16,6 +17,7 @@ function TypeToolbar({ els }: { els: ReturnType<typeof useSelectedElements> }) {
   if (allOfType(els, 'shape')) return <ShapeToolbar els={els} />;
   if (allOfType(els, 'line')) return <LineToolbar els={els} />;
   if (allOfType(els, 'image')) return <ImageToolbar els={els} />;
+  if (allOfType(els, 'button')) return <ButtonToolbar els={els} />;
   return <MultiToolbar els={els} />;
 }
 

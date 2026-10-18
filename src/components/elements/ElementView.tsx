@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import type { DocElement } from '@/types/doc';
+import { ButtonView } from './ButtonView';
 import { FieldView } from './FieldView';
 import { ImageView } from './ImageView';
 import { LineView } from './LineView';
@@ -28,6 +29,8 @@ function renderBody(props: ElementViewProps, el: DocElement) {
           editing={props.editing}
         />
       );
+    case 'button':
+      return <ButtonView el={el} mode={props.mode} onSubmit={props.onSubmit} />;
     default: {
       const unreachable: never = el;
       return unreachable;

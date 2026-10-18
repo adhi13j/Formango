@@ -7,6 +7,7 @@ import {
   Layers,
   Lock,
   Minus,
+  MousePointerClick,
   Shapes,
   TextCursorInput,
   Type,
@@ -27,6 +28,7 @@ const ICONS: Record<DocElement['type'], ReactNode> = {
   line: <Minus size={16} />,
   image: <Image size={16} />,
   field: <TextCursorInput size={16} />,
+  button: <MousePointerClick size={16} />,
 };
 
 function LayerRow({

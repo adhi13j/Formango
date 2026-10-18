@@ -6,7 +6,7 @@ import { createBlankDoc } from '@/types/doc.schema';
 import type { DocElement, FieldElement, TextElement } from '@/types/doc';
 
 const store = () => useDocStore.getState();
-const elements = () => store().doc.elements;
+const elements = () => store().doc.elements.filter((el) => el.type !== 'button');
 const history = () => temporalStore.getState().pastStates.length;
 
 function add(kind: Parameters<typeof createElement>[0]): DocElement {
@@ -27,11 +27,12 @@ describe('adding and removing', () => {
   });
 
   it('refuses to go past the element limit', () => {
-    for (let i = 0; i < MAX_ELEMENTS; i += 1)
+    // The submit button counts toward the limit.
+    for (let i = 0; i < MAX_ELEMENTS - 1; i += 1)
       store().addElement(createElement('line', store().doc));
-    expect(elements()).toHaveLength(MAX_ELEMENTS);
+    expect(store().doc.elements).toHaveLength(MAX_ELEMENTS);
     expect(store().addElement(createElement('line', store().doc))).toBe(false);
-    expect(elements()).toHaveLength(MAX_ELEMENTS);
+    expect(store().doc.elements).toHaveLength(MAX_ELEMENTS);
   });
 
   it('removes elements', () => {
@@ -115,15 +116,17 @@ describe('duplicate, reorder, lock, hide, rename', () => {
 
   it('reorders to front, back, forward, and backward', () => {
     const [a, b, c] = [add('rect'), add('ellipse'), add('line')];
-    const order = () => elements().map((e) => e.id);
+    // The submit button is a layer too: it starts at the bottom of the stack.
+    const button = store().doc.elements[0]?.id ?? '';
+    const order = () => store().doc.elements.map((e) => e.id);
     store().reorder([a.id], 'front');
-    expect(order()).toEqual([b.id, c.id, a.id]);
+    expect(order()).toEqual([button, b.id, c.id, a.id]);
     store().reorder([a.id], 'back');
-    expect(order()).toEqual([a.id, b.id, c.id]);
+    expect(order()).toEqual([a.id, button, b.id, c.id]);
     store().reorder([a.id], 'forward');
-    expect(order()).toEqual([b.id, a.id, c.id]);
+    expect(order()).toEqual([button, a.id, b.id, c.id]);
     store().reorder([a.id], 'backward');
-    expect(order()).toEqual([a.id, b.id, c.id]);
+    expect(order()).toEqual([a.id, button, b.id, c.id]);
   });
 
   it('keeps the relative order of a multi-selection when reordering', () => {
@@ -134,6 +137,7 @@ describe('duplicate, reorder, lock, hide, rename', () => {
 
   it('does not add history when reordering at the end', () => {
     const [a] = [add('rect'), add('ellipse')];
+    store().reorder([a.id], 'back');
     const before = history();
     store().reorder([a.id], 'back');
     expect(history()).toBe(before);
@@ -159,9 +163,15 @@ describe('page settings', () => {
     expect(elements()[0]).toMatchObject({ x: 0, width: 390 });
   });
 
-  it('updates nested submit settings', () => {
-    store().setPage({ submit: { label: 'Send' } });
-    expect(store().doc.page.submit).toMatchObject({ label: 'Send', fill: '#FF9F1C' });
+  it('keeps exactly one submit button that cannot be removed or duplicated', () => {
+    const button = () => store().doc.elements.filter((el) => el.type === 'button');
+    expect(button()).toHaveLength(1);
+    const id = button()[0]?.id ?? '';
+    store().removeElements([id]);
+    expect(button().map((el) => el.id)).toEqual([id]);
+    expect(store().duplicateElements([id])).toEqual([]);
+    store().updateElement(id, { label: 'Send' });
+    expect(button()[0]).toMatchObject({ label: 'Send', fill: '#FF9F1C' });
   });
 
   it('falls back to a default title and caps its length', () => {

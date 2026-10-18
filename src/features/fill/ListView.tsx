@@ -14,6 +14,7 @@ interface ListViewProps {
   answers: Record<string, AnswerValue>;
   errors?: Record<string, string> | undefined;
   onAnswer: (id: string, value: AnswerValue | undefined) => void;
+  onSubmit?: (() => void) | undefined;
 }
 
 /** One element laid out for a single column: full width, own height, positioned at the origin. */
@@ -35,6 +36,7 @@ function toColumn(el: DocElement, width: number): DocElement | null {
         height: Math.round((el.height * width) / Math.max(1, el.width)),
       };
     case 'field':
+    case 'button':
       return { ...el, x: 0, y: 0, width };
     default: {
       const unreachable: never = el;
@@ -44,7 +46,7 @@ function toColumn(el: DocElement, width: number): DocElement | null {
 }
 
 /** A4 forms on phones: the same elements, one per row, top to bottom. Shapes and lines are skipped. */
-export function ListView({ doc, width, mode, answers, errors, onAnswer }: ListViewProps) {
+export function ListView({ doc, width, mode, answers, errors, onAnswer, onSubmit }: ListViewProps) {
   const column = [...doc.elements]
     .filter((el) => !el.hidden)
     .sort(byReadingOrder)
@@ -70,6 +72,7 @@ export function ListView({ doc, width, mode, answers, errors, onAnswer }: ListVi
             value={answers[el.id]}
             error={errors?.[el.id]}
             onAnswer={onAnswer}
+            onSubmit={onSubmit}
           />
         </div>
       ))}

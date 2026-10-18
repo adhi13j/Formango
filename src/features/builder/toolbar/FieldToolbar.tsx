@@ -17,6 +17,7 @@ import { isOptionList } from '@/lib/fields';
 import type { FieldElement, FieldValidation } from '@/types/doc';
 import { CommonActions } from './CommonActions';
 import { ColorControl, FontSelect, NumberField } from './kit';
+import { FileOptions } from './FileOptions';
 import { OptionsEditor } from './OptionsEditor';
 import { commonValue, patchAll, type OfType } from './selection';
 
@@ -173,7 +174,8 @@ export function FieldToolbar({ els }: { els: OfType<'field'>[] }) {
       {single && (isOptionList(single.fieldType) || single.fieldType === 'dropdown') && (
         <OptionsEditor key={single.id} el={single} />
       )}
-      {single && ['text', 'longtext', 'dropdown'].includes(single.fieldType) && (
+      {single?.fieldType === 'file' && <FileOptions el={single} />}
+      {single && ['text', 'longtext', 'dropdown', 'file'].includes(single.fieldType) && (
         <PlaceholderPopover el={single} />
       )}
       {onlyType === 'text' && (

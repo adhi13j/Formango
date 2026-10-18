@@ -6,6 +6,7 @@ import {
   CircleDot,
   PenLine,
   Type,
+  Upload,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { FieldType } from '@/types/doc';
@@ -33,7 +34,18 @@ const FIELDS: { type: FieldType; title: string; hint: string; icon: ReactNode }[
   },
   { type: 'radio', title: 'Radio', hint: 'Pick exactly one', icon: <CircleDot size={20} /> },
   { type: 'date', title: 'Date', hint: 'Choose a day', icon: <CalendarDays size={20} /> },
-  { type: 'signature', title: 'Signature', hint: 'Draw a signature', icon: <PenLine size={20} /> },
+  {
+    type: 'signature',
+    title: 'Signature',
+    hint: 'Draw, type, or upload',
+    icon: <PenLine size={20} />,
+  },
+  {
+    type: 'file',
+    title: 'File upload',
+    hint: 'Photo, PDF, or document',
+    icon: <Upload size={20} />,
+  },
 ];
 
 export function FieldsPanel() {

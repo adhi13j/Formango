@@ -1,6 +1,8 @@
-import { Calendar, Check, ChevronDown } from 'lucide-react';
-import type { CSSProperties } from 'react';
+import { Calendar, Check, ChevronDown, FileText, Upload, X } from 'lucide-react';
+import { useRef, useState, type CSSProperties } from 'react';
 import { FIELD_ROW_HEIGHT } from '@/lib/constants';
+import { acceptAttribute, checkFile, describeFileRules, formatBytes } from '@/lib/fileTypes';
+import { getAnswerFile, setAnswerFile } from '@/lib/fileAnswers';
 import { FONTS } from '@/lib/fonts';
 import { truncateToWidth } from '@/lib/text/layoutText';
 import type { FieldElement, InputStyle } from '@/types/doc';
@@ -10,11 +12,18 @@ const PAD_X = 12;
 const MARK_SIZE = 16;
 const MARK_GAP = 10;
 
-export function boxStyle(s: InputStyle): CSSProperties {
+/** Border color of a box that has been filled in. Screen only: the PDF keeps the designed stroke. */
+export const FILLED_STROKE = 'var(--leaf-500)';
+
+export function boxStyle(s: InputStyle, filled = false): CSSProperties {
+  const color = filled ? FILLED_STROKE : s.stroke;
   return {
     boxSizing: 'border-box',
     background: s.fill,
-    border: s.strokeWidth > 0 ? `${s.strokeWidth}px solid ${s.stroke}` : 'none',
+    border: s.strokeWidth > 0 ? `${s.strokeWidth}px solid ${color}` : 'none',
+    // A box designed without a border still shows it is filled.
+    boxShadow: filled && s.strokeWidth === 0 ? `inset 0 0 0 2px ${FILLED_STROKE}` : 'none',
+    transition: 'border-color 150ms ease, box-shadow 150ms ease',
     borderRadius: s.radius,
     color: s.textColor,
     fontFamily: fontStack(FONTS[s.fontFamily].family),
@@ -53,6 +62,7 @@ function EditBox({ el }: { el: FieldElement }) {
   const s = el.inputStyle;
   const isLong = el.fieldType === 'longtext';
   const isSignature = el.fieldType === 'signature';
+  const isFile = el.fieldType === 'file';
   const hint =
     el.placeholder ||
     (el.fieldType === 'dropdown'
@@ -74,7 +84,19 @@ function EditBox({ el }: { el: FieldElement }) {
         ...(isSignature ? { borderStyle: 'dashed' } : null),
       }}
     >
-      {isSignature ? <Placeholder>Sign here</Placeholder> : <Placeholder>{hint}</Placeholder>}
+      {isSignature ? (
+        <Placeholder>Draw, type, or upload your signature</Placeholder>
+      ) : isFile ? (
+        <>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 8, opacity: 0.8 }}>
+            <Upload size={16} aria-hidden="true" style={{ flex: 'none' }} />
+            <Placeholder>{el.placeholder || 'Choose a file'}</Placeholder>
+          </span>
+          <Placeholder>{describeFileRules(el)}</Placeholder>
+        </>
+      ) : (
+        <Placeholder>{hint}</Placeholder>
+      )}
       {el.fieldType === 'dropdown' && (
         <ChevronDown size={16} aria-hidden="true" style={{ flex: 'none' }} />
       )}
@@ -89,10 +111,13 @@ function ChoiceMark({
   kind,
   checked,
   style,
+  highlight,
 }: {
   kind: 'radio' | 'checkbox';
   checked: boolean;
   style: InputStyle;
+  /** Turn the border green when checked (preview and fill). */
+  highlight: boolean;
 }) {
   const border = Math.max(1, style.strokeWidth);
   return (
@@ -109,7 +134,8 @@ function ChoiceMark({
         alignItems: 'center',
         justifyContent: 'center',
         background: style.fill,
-        border: `${border}px solid ${style.stroke}`,
+        border: `${border}px solid ${checked && highlight ? FILLED_STROKE : style.stroke}`,
+        transition: 'border-color 150ms ease',
         borderRadius: kind === 'radio' ? '50%' : 4,
         color: style.textColor,
       }}
@@ -172,7 +198,7 @@ function ChoiceList({ el, interactive, value, describedBy, onChange }: InputProp
                 onChange={(event) => toggle(option, event.target.checked)}
               />
             )}
-            <ChoiceMark kind={kind} checked={checked} style={s} />
+            <ChoiceMark kind={kind} checked={checked} style={s} highlight={interactive} />
             <span style={{ whiteSpace: 'pre' }}>
               {truncateToWidth(option, s.fontFamily, s.fontSize, 400, textWidth)}
             </span>
@@ -199,7 +225,8 @@ function RealControl({ el, inputId, value, error, describedBy, onChange }: Input
     'aria-invalid': error ? true : undefined,
     'aria-describedby': describedBy,
   } as const;
-  const base: CSSProperties = { ...fill, ...boxStyle(s), margin: 0, outlineOffset: 2 };
+  const filled = value !== undefined && value !== '' && !error;
+  const base: CSSProperties = { ...fill, ...boxStyle(s, filled), margin: 0, outlineOffset: 2 };
 
   if (el.fieldType === 'longtext') {
     return (
@@ -270,9 +297,129 @@ function RealControl({ el, inputId, value, error, describedBy, onChange }: Input
   );
 }
 
+/** File upload: one button, then the chosen file with a remove button. */
+function FileControl({ el, inputId, value, error, describedBy, onChange }: InputProps) {
+  const s = el.inputStyle;
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [problem, setProblem] = useState<string | null>(null);
+  const name = typeof value === 'string' ? value : '';
+  const file = name ? getAnswerFile(el.id) : undefined;
+  const filled = name !== '' && !error;
+  const shownError = problem ?? error;
+  const pick = (picked: File | undefined) => {
+    if (!picked) return;
+    const message = checkFile(picked, el);
+    setProblem(message);
+    if (message) return;
+    setAnswerFile(el.id, picked);
+    onChange(picked.name);
+  };
+  const clear = () => {
+    setProblem(null);
+    setAnswerFile(el.id, undefined);
+    onChange(undefined);
+    if (inputRef.current) inputRef.current.value = '';
+    inputRef.current?.focus();
+  };
+  return (
+    <div style={{ position: 'relative', ...fill }}>
+      <input
+        ref={inputRef}
+        id={inputId}
+        type="file"
+        className="sr-only"
+        accept={acceptAttribute(el)}
+        required={el.required && !name}
+        aria-invalid={shownError ? true : undefined}
+        aria-describedby={describedBy}
+        onChange={(event) => pick(event.target.files?.[0])}
+      />
+      <div
+        style={{
+          ...fill,
+          ...boxStyle(s, filled),
+          ...(filled || shownError ? null : { borderStyle: 'dashed' }),
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+          padding: `0 ${PAD_X}px`,
+          overflow: 'hidden',
+        }}
+      >
+        {name ? (
+          <>
+            <FileText size={18} aria-hidden="true" style={{ flex: 'none' }} />
+            <span
+              style={{
+                flex: 1,
+                minWidth: 0,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {name}
+              {file && <span style={{ opacity: 0.6 }}>{`  ${formatBytes(file.size)}`}</span>}
+            </span>
+            <button
+              type="button"
+              aria-label={`Remove ${name}`}
+              onClick={clear}
+              className="inline-flex size-8 flex-none cursor-pointer items-center justify-center rounded-md bg-transparent focus-visible:outline-2 focus-visible:outline-ring"
+              style={{ color: s.textColor, border: 0 }}
+            >
+              <X size={16} aria-hidden="true" />
+            </button>
+          </>
+        ) : (
+          <label
+            htmlFor={inputId}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              width: '100%',
+              cursor: 'pointer',
+              minWidth: 0,
+            }}
+          >
+            <Upload size={18} aria-hidden="true" style={{ flex: 'none' }} />
+            <span
+              style={{
+                flex: 1,
+                minWidth: 0,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {el.placeholder || 'Choose a file'}
+            </span>
+            <span
+              style={{ opacity: 0.6, fontSize: Math.max(12, s.fontSize - 3), whiteSpace: 'nowrap' }}
+            >
+              {describeFileRules(el)}
+            </span>
+          </label>
+        )}
+      </div>
+      {problem && (
+        <p
+          role="alert"
+          className="m-0 text-sm text-error"
+          style={{ position: 'absolute', left: 0, top: '100%', marginTop: 4 }}
+        >
+          {problem}
+        </p>
+      )}
+    </div>
+  );
+}
+
 export function FieldInput(props: InputProps) {
   const { el, interactive } = props;
   if (el.fieldType === 'radio' || el.fieldType === 'checkbox') return <ChoiceList {...props} />;
   if (!interactive || el.fieldType === 'signature') return <EditBox el={el} />;
+  if (el.fieldType === 'file') return <FileControl {...props} />;
   return <RealControl {...props} />;
 }

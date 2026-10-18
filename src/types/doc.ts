@@ -4,12 +4,6 @@ export type { FontId };
 
 export type PagePreset = 'mobile' | 'a4';
 
-export interface SubmitSettings {
-  label: string;
-  fill: string;
-  textColor: string;
-}
-
 export interface PageSettings {
   preset: PagePreset;
   /** mobile 390, a4 794 */
@@ -22,12 +16,11 @@ export interface PageSettings {
   outerBackground: string;
   /** layout grid margin: mobile 20, a4 40 */
   margin: number;
-  submit: SubmitSettings;
 }
 
 export interface BaseElement {
   id: string;
-  type: 'text' | 'shape' | 'line' | 'image' | 'field';
+  type: 'text' | 'shape' | 'line' | 'image' | 'field' | 'button';
   name: string;
   x: number;
   y: number;
@@ -77,7 +70,10 @@ export interface ImageElement extends BaseElement {
 }
 
 export type FieldType =
-  'text' | 'longtext' | 'dropdown' | 'checkbox' | 'radio' | 'date' | 'signature';
+  'text' | 'longtext' | 'dropdown' | 'checkbox' | 'radio' | 'date' | 'signature' | 'file';
+
+/** What a file field accepts. Each kind maps to a list of extensions in `lib/fileTypes.ts`. */
+export type FileKind = 'image' | 'pdf' | 'document' | 'spreadsheet';
 
 export type FieldValidation = 'none' | 'email' | 'phone' | 'number';
 
@@ -108,11 +104,31 @@ export interface FieldElement extends BaseElement {
   required: boolean;
   validation: FieldValidation;
   options: string[];
+  /** File fields only: allowed kinds (empty means any of the supported kinds). */
+  fileKinds: FileKind[];
+  /** File fields only: largest file in whole megabytes. */
+  maxFileMb: number;
   labelStyle: LabelStyle;
   inputStyle: InputStyle;
 }
 
-export type DocElement = TextElement | ShapeElement | LineElement | ImageElement | FieldElement;
+/**
+ * The button people press to send the form. Every form has exactly one: it cannot be deleted or
+ * duplicated, but it can be moved, resized, and restyled like anything else.
+ */
+export interface ButtonElement extends BaseElement {
+  type: 'button';
+  label: string;
+  fontFamily: FontId;
+  fontSize: number;
+  fontWeight: 400 | 700;
+  textColor: string;
+  fill: string;
+  radius: number;
+}
+
+export type DocElement =
+  TextElement | ShapeElement | LineElement | ImageElement | FieldElement | ButtonElement;
 export type ElementType = DocElement['type'];
 
 export interface FormDoc {

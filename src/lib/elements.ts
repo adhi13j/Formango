@@ -1,5 +1,5 @@
 import { nanoid } from 'nanoid';
-import { COLORS, DEFAULT_FONT, PRESETS } from '@/lib/constants';
+import { COLORS, DEFAULT_FILE_MB, DEFAULT_FONT, PRESETS } from '@/lib/constants';
 import { optionListHeight } from '@/lib/fields';
 import { slugify, uniqueSlug } from '@/lib/slug';
 import type {
@@ -41,6 +41,7 @@ const FIELD_LABELS: Record<FieldType, { label: string; name: string }> = {
   radio: { label: 'Single choice', name: 'Radio' },
   date: { label: 'Date', name: 'Date' },
   signature: { label: 'Signature', name: 'Signature' },
+  file: { label: 'Upload a file', name: 'File upload' },
 };
 
 export const FIELD_TYPES = Object.keys(FIELD_LABELS) as FieldType[];
@@ -102,9 +103,11 @@ function fieldElement(
       ? 140
       : fieldType === 'signature'
         ? 144
-        : fieldType === 'radio' || fieldType === 'checkbox'
-          ? optionListHeight(14, options.length)
-          : 72;
+        : fieldType === 'file'
+          ? 96
+          : fieldType === 'radio' || fieldType === 'checkbox'
+            ? optionListHeight(14, options.length)
+            : 72;
   const taken = new Set(doc.elements.flatMap((el) => (el.type === 'field' ? [el.key] : [])));
   return {
     ...baseOf(page, name, height, fullWidth),
@@ -116,6 +119,8 @@ function fieldElement(
     required: false,
     validation: 'none',
     options,
+    fileKinds: fieldType === 'file' ? ['image', 'pdf'] : [],
+    maxFileMb: DEFAULT_FILE_MB,
     labelStyle: { fontFamily: DEFAULT_FONT, fontSize: 14, fontWeight: 700, color: COLORS.ink },
     inputStyle: {
       fontFamily: DEFAULT_FONT,

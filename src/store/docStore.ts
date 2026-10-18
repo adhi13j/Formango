@@ -20,9 +20,7 @@ export interface DocState {
   replaceDoc: (doc: FormDoc) => void;
   newDoc: (preset: PagePreset) => void;
   setTitle: (title: string) => void;
-  setPage: (
-    patch: Partial<Omit<PageSettings, 'submit'>> & { submit?: Partial<PageSettings['submit']> },
-  ) => void;
+  setPage: (patch: Partial<PageSettings>) => void;
   switchPreset: (preset: PagePreset) => void;
   /** Returns false when the element limit is reached. */
   addElement: (el: DocElement) => boolean;
@@ -126,9 +124,7 @@ export const useDocStore = create<DocState>()(
 
         setPage: (patch) =>
           commit((doc) => {
-            const { submit, ...rest } = patch;
-            const page = { ...doc.page, ...rest, submit: { ...doc.page.submit, ...submit } };
-            return normalizeDoc({ ...doc, page });
+            return normalizeDoc({ ...doc, page: { ...doc.page, ...patch } });
           }),
 
         switchPreset: (preset) =>
@@ -157,14 +153,18 @@ export const useDocStore = create<DocState>()(
 
         removeElements: (ids) =>
           commit((doc) => {
-            const remove = new Set(ids);
+            // The submit button can never be removed.
+            const buttons = new Set(
+              doc.elements.filter((el) => el.type === 'button').map((el) => el.id),
+            );
+            const remove = new Set(ids.filter((id) => !buttons.has(id)));
             const elements = doc.elements.filter((el) => !remove.has(el.id));
             return elements.length === doc.elements.length ? doc : withElements(doc, elements);
           }),
 
         duplicateElements: (ids) => {
           const doc = get().doc;
-          const source = doc.elements.filter((el) => ids.includes(el.id));
+          const source = doc.elements.filter((el) => ids.includes(el.id) && el.type !== 'button');
           const room = MAX_ELEMENTS - doc.elements.length;
           const usedKeys = new Set(
             doc.elements.flatMap((el) => (el.type === 'field' ? [el.key] : [])),

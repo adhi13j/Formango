@@ -1,6 +1,68 @@
 import { describe, expect, it } from 'vitest';
 import { createBlankDoc, migrate, parseDoc } from '@/types/doc.schema';
 
+describe('submit button', () => {
+  it('is part of every new document, at the bottom', () => {
+    const doc = createBlankDoc('a4');
+    const buttons = doc.elements.filter((el) => el.type === 'button');
+    expect(buttons).toHaveLength(1);
+    expect(buttons[0]).toMatchObject({ label: 'Submit', y: 1035, x: 40, width: 714 });
+  });
+
+  it('is added to an older document that has none, and old page.submit data is ignored', () => {
+    const old = { ...createBlankDoc('mobile'), elements: [] };
+    const raw = { ...old, page: { ...old.page, submit: { label: 'Send' } } };
+    const result = parseDoc(raw);
+    expect(result.ok && result.doc.elements.filter((el) => el.type === 'button')).toHaveLength(1);
+  });
+
+  it('keeps only one when a file contains several', () => {
+    const doc = createBlankDoc('mobile');
+    const [button] = doc.elements;
+    const raw = { ...doc, elements: [button, { ...button, id: 'second' }] };
+    const result = parseDoc(raw);
+    expect(result.ok && result.doc.elements).toHaveLength(1);
+  });
+});
+
+describe('file fields', () => {
+  it('get default file rules when an older file lacks them', () => {
+    const doc = createBlankDoc('mobile');
+    const field = {
+      id: 'f1',
+      type: 'field',
+      fieldType: 'file',
+      name: 'File',
+      x: 20,
+      y: 20,
+      width: 300,
+      height: 96,
+      locked: false,
+      hidden: false,
+      key: 'file',
+      label: 'File',
+      placeholder: '',
+      required: false,
+      validation: 'none',
+      options: [],
+      labelStyle: { fontFamily: 'dm-sans', fontSize: 14, fontWeight: 700, color: '#2A1805' },
+      inputStyle: {
+        fontFamily: 'dm-sans',
+        fontSize: 16,
+        textColor: '#2A1805',
+        fill: '#FFFFFF',
+        stroke: '#A58B6A',
+        strokeWidth: 1,
+        radius: 8,
+      },
+    };
+    const result = parseDoc({ ...doc, elements: [field, ...doc.elements] });
+    expect(result.ok).toBe(true);
+    const parsed = result.ok ? result.doc.elements[0] : undefined;
+    expect(parsed).toMatchObject({ fileKinds: [], maxFileMb: 5 });
+  });
+});
+
 describe('doc schema', () => {
   it('accepts a blank doc for both presets', () => {
     expect(parseDoc(createBlankDoc('mobile')).ok).toBe(true);
