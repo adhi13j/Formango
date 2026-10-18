@@ -209,7 +209,7 @@ Goal: by the end, the owner can open `/builder`, design a form, undo and redo, p
   - **Do:** finish unit tests (store, geometry, layoutText, persistence, schema, templates). Add a component test for ElementView in each mode. Add a dev-only "Add 100 elements" menu item (hidden in production builds) and profile dragging with React DevTools and the browser Performance tab.
   - **Done when:** `npm run check` passes. Dragging with 100 elements shows no long tasks over 50ms and no re-render of unselected elements (verify with the React Profiler).
 
-- [ ] **1.22 Phase 1 checkpoint (STOP and hand to owner)**
+- [x] **1.22 Phase 1 checkpoint (STOP and hand to owner)**
   - **Do:** run the full `npm run check` (including Playwright), then `docs/qa-checklist.md` section "Phase 1" yourself and fix failures. Tag `phase-1`. Commit. Write the handoff note: how to run, what to click, known limitations, screenshots. **Wait for the owner to test the builder before starting Phase 2.**
 
 ---

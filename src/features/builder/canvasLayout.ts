@@ -36,5 +36,6 @@ export function canvasLayout(
 /** Zoom that fits the page width, never above 100%. */
 export function fitZoom(viewportWidth: number, pageWidth: number): number {
   if (viewportWidth <= 0) return 1;
-  return Math.min(1, (viewportWidth - WORKSPACE_PADDING * 2) / pageWidth);
+  // Round down to a whole percent: rounding up could make the page 1px too wide for the window.
+  return Math.min(1, Math.floor(((viewportWidth - WORKSPACE_PADDING * 2) / pageWidth) * 100) / 100);
 }

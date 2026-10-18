@@ -12,8 +12,6 @@ import { flushSync } from 'react-dom';
 import Moveable, {
   type OnDrag,
   type OnDragEnd,
-  type OnDragGroup,
-  type OnDragGroupEnd,
   type OnDragStart,
   type OnResize,
   type OnResizeEnd,
@@ -92,6 +90,8 @@ export function SelectionLayer({
     const [root, setRoot] = useState<HTMLDivElement | null>(null);
     const moveableRef = useRef<Moveable>(null);
     const [targets, setTargets] = useState<HTMLElement[]>([]);
+    const [proxy, setProxy] = useState<HTMLDivElement | null>(null);
+    const proxyRef = useRef<HTMLDivElement | null>(null);
     const [guides, setGuides] = useState<{ xs: number[]; ys: number[] }>({ xs: [], ys: [] });
     const [badge, setBadge] = useState<{ x: number; y: number; text: string } | null>(null);
     const [keepRatio, setKeepRatio] = useState(false);
@@ -182,6 +182,9 @@ export function SelectionLayer({
       const dy = rect.y - g.union.y;
       translate.current = [dx, dy];
       for (const node of nodes) node.style.transform = `translate(${dx}px, ${dy}px)`;
+      if (proxyRef.current && isGroup) {
+        proxyRef.current.style.transform = `translate(${dx * zoom}px, ${dy * zoom}px)`;
+      }
     };
 
     const commitMove = (nodes: HTMLElement[]) => {
@@ -189,6 +192,7 @@ export function SelectionLayer({
       gesture.current = null;
       showGuides([], []);
       for (const node of nodes) node.style.transform = '';
+      if (proxyRef.current) proxyRef.current.style.transform = '';
       if (!g) return;
       const [dx, dy] = translate.current;
       if (dx === 0 && dy === 0) return;
@@ -281,7 +285,31 @@ export function SelectionLayer({
 
     useEffect(() => () => cancelAnimationFrame(frame.current), []);
 
+    /** The element under a screen point, ignoring the group box on top of it. */
+    const elementAt = (x: number, y: number): string | undefined =>
+      document
+        .elementsFromPoint(x, y)
+        .map((node) => node.closest<HTMLElement>('[data-element-id]')?.dataset.elementId)
+        .find((id) => id !== undefined);
+
+    const forwardModifierClick = (event: React.PointerEvent) => {
+      if (!(event.shiftKey || event.metaKey || event.ctrlKey)) return;
+      const id = elementAt(event.clientX, event.clientY);
+      if (id) {
+        event.stopPropagation();
+        useUiStore.getState().toggleSelect(id);
+      }
+    };
+    // A plain click (no drag) on a group picks the single element under the pointer.
+    const forwardPlainClick = (event: React.MouseEvent) => {
+      if (event.shiftKey || event.metaKey || event.ctrlKey) return;
+      const id = elementAt(event.clientX, event.clientY);
+      if (id) useUiStore.getState().select([id]);
+    };
+
     const single = selected.length === 1 ? selected[0] : undefined;
+    const isGroup = selected.length > 1;
+    const groupBox = isGroup ? unionRect(selected) : null;
     const lockedSelection = selected.filter((el) => el.locked);
 
     return (
@@ -350,46 +378,60 @@ export function SelectionLayer({
           </div>
         )}
 
-        {root && canTransform && targets.length > 0 && (
+        {groupBox && (
+          // Invisible box over all selected elements. Moveable drags it, and pressing any selected
+          // element drags it too (dragTarget). Its movement is applied to every selected element.
+          <div
+            ref={(node) => {
+              proxyRef.current = node;
+              setProxy(node);
+            }}
+            onPointerDown={forwardModifierClick}
+            onClick={forwardPlainClick}
+            data-testid="group-proxy"
+            style={{
+              position: 'absolute',
+              left: offsetX + groupBox.x * zoom,
+              top: offsetY + groupBox.y * zoom,
+              width: groupBox.width * zoom,
+              height: groupBox.height * zoom,
+              pointerEvents: 'auto',
+              cursor: 'move',
+            }}
+          />
+        )}
+
+        {root && canTransform && targets.length > 0 && (!isGroup || proxy) && (
           <Moveable
             ref={moveableRef}
             flushSync={flushSync}
             className="fm-moveable"
             container={root}
             useAccuratePosition
-            target={targets.length === 1 ? targets[0] : targets}
+            target={isGroup ? proxy : targets[0]}
             origin={false}
             draggable
             throttleDrag={0}
-            resizable={targets.length === 1}
+            resizable={!isGroup}
             throttleResize={0}
-            keepRatio={
-              targets.length === 1 && (shiftDown || (single?.type === 'image' && keepRatio))
-            }
+            keepRatio={!isGroup && (shiftDown || (single?.type === 'image' && keepRatio))}
             renderDirections={single ? directionsFor(single) : false}
             snappable={false}
             onDragStart={(e: OnDragStart) => {
+              if (isGroup) return dragStart(selected.map((el) => el.id));
               const id = (e.target as HTMLElement).dataset.elementId;
               if (id) dragStart([id]);
             }}
-            onDrag={(e: OnDrag) =>
-              applyMove(e.beforeTranslate[0] ?? 0, e.beforeTranslate[1] ?? 0, [
-                e.target as HTMLElement,
-              ])
-            }
-            onDragEnd={(e: OnDragEnd) =>
-              e.isDrag ? commitMove([e.target as HTMLElement]) : commitMove([])
-            }
-            onDragGroupStart={() => dragStart(selected.map((el) => el.id))}
-            onDragGroup={(e: OnDragGroup) =>
+            onDrag={(e: OnDrag) => {
+              const scale = isGroup ? 1 / zoom : 1;
               applyMove(
-                e.beforeTranslate[0] ?? 0,
-                e.beforeTranslate[1] ?? 0,
-                e.targets as HTMLElement[],
-              )
-            }
-            onDragGroupEnd={(e: OnDragGroupEnd) =>
-              e.isDrag ? commitMove(e.targets as HTMLElement[]) : commitMove([])
+                (e.beforeTranslate[0] ?? 0) * scale,
+                (e.beforeTranslate[1] ?? 0) * scale,
+                isGroup ? targets : [e.target as HTMLElement],
+              );
+            }}
+            onDragEnd={(e: OnDragEnd) =>
+              commitMove(e.isDrag ? (isGroup ? targets : [e.target as HTMLElement]) : [])
             }
             onResizeStart={(e: OnResizeStart) => single && resizeStart(e, single)}
             onResize={(e: OnResize) => single && resizeMove(e, single)}

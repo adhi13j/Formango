@@ -94,7 +94,7 @@ When a rail item is clicked, a **flyout panel (280px)** slides out beside the ra
 | Contextual toolbar | 48px | Content depends on selection (below). When nothing is selected it shows **Page settings** |
 | Rail | 72px wide, icon + 11px label | Fields, Elements, Templates, Uploads |
 | Flyout | 280px | Content for the active rail item |
-| Workspace | Remaining | `--workspace` color, scrolls both ways, page centered with at least 80px padding around it |
+| Workspace | Remaining | Shows the form's **outer background color** (so the Outer background control gives instant feedback), scrolls both ways, page centered with at least 80px padding around it |
 | Bottom bar | 44px | Page size chip (opens the size menu), zoom out, zoom % (click for presets: 50, 75, 100, 150, 200), zoom in, Fit, Layers button |
 
 ### Rail panels

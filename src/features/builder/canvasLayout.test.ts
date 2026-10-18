@@ -21,7 +21,8 @@ describe('canvasLayout', () => {
 describe('fitZoom', () => {
   it('fits the width but never above 100%', () => {
     expect(fitZoom(1000, 390)).toBe(1);
-    expect(fitZoom(634, 794)).toBeCloseTo(0.597, 2);
+    expect(fitZoom(634, 794)).toBe(0.59);
+    expect(fitZoom(937, 794)).toBe(0.97);
     expect(fitZoom(0, 794)).toBe(1);
   });
 });

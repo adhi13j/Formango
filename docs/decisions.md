@@ -59,3 +59,22 @@ Consequences: `layoutText` (task 1.3) measures per-character advances with geome
 | Prettier ignores `*.md`, `docs/`, and `src/styles/theme.css` | It reformatted the doc tables and lowercased the theme hex values |
 | `/dev/theme` is a dev-only route (`import.meta.env.DEV`) and the Builder route is lazy | Keeps the theme page out of production and the builder out of the fill page bundle |
 | Commit messages start with `done: <task>` | Owner preference |
+
+## 2026-10-18: Phase 1 build decisions
+
+| Decision | Reason |
+|---|---|
+| Snapping is our own pure function (`lib/snap.ts`, unit tested) in document px; react-moveable only provides pointer mechanics (`snappable` is off) | Moveable's snapping works in screen space and needed conversion for zoom and page offset. Ours is testable and exact at any zoom. Guides are drawn in the overlay |
+| During a move only the DOM transform changes. During a resize only the dragged element receives a live width and height (so text and fields re-wrap) and the store is written once on release | "Gestures write once". Letting React move the element while Moveable tracks its own transform made the two double-count |
+| Multi-select moves through one invisible box over the selection (`group-proxy`), not Moveable's group mode | Group events never fired in react-moveable 0.56 in this setup. The box forwards shift-clicks and plain clicks to the element underneath |
+| An unselected element is selected synchronously on `pointerdown` so Moveable is attached before the `mousedown` that follows | Forwarding `dragStart` by hand did not work. This gives one press-and-drag |
+| New elements go to the visible center, then slide below anything they would overlap | Stacking every new field on the same spot hid the earlier ones. Also satisfies "never stack exactly" |
+| Radio and checkbox groups use `role="radiogroup"` / `role="group"` with `aria-labelledby`, not `<fieldset>` | Positioned `<legend>` is unreliable across browsers (Firefox is the owner's browser). Same semantics for screen readers |
+| Outer background color is also the editor's workspace color | The spec only showed it in preview, so changing it looked broken |
+| Fit zoom rounds down to a whole percent | Rounding up made the page 1px too wide and caused sideways scrolling |
+| Signature default height is 144 (18 + 6 + 120 minimum box), not 140 | Normalization raised 140 to 144 anyway |
+| Shortcuts ignore Enter and Space on buttons, links and menu items; overlays only block shortcuts for dialogs, menus and listboxes (not tooltips) | Otherwise keyboard users could not activate a focused button, and a tooltip blocked Ctrl+Z |
+| Focus moves to the canvas after an element is added | A keyboard-only user can then press Enter to edit, arrows to move, Delete to remove |
+| The builder grid uses `minmax(0, 1fr)` | Without it the canvas content widened the layout and the window could not shrink |
+| Playwright runs in Chromium and Firefox; the 100-element timing tests run alone in a `perf` project | The owner uses Firefox; timing is meaningless while other tests compete for the CPU |
+| Signature fields show a drawn box in preview for now | The signature pad is task 2.3 |

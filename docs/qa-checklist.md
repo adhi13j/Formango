@@ -85,7 +85,7 @@ Test browsers: latest Chrome (main), Safari, Firefox. Desktop window sizes: 1280
 - [ ] Preview hides all editing chrome and looks identical to the edit view.
 - [ ] Desktop mode shows the outer background around a mobile-preset page. Phone mode shows a 390px frame.
 - [ ] An A4 form in Phone mode shows List view with no horizontal scroll.
-- [ ] All field types are interactive. Reset answers clears them. Esc exits. Nothing is saved.
+- [ ] All field types are interactive (signature is a drawn box until the signature pad in Phase 2). Reset answers clears them. Esc exits. Nothing is saved.
 
 ### K. Keyboard and accessibility
 - [ ] Every shortcut in the `?` dialog works. None fire while typing in an input.

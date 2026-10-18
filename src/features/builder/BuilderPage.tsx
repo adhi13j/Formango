@@ -49,7 +49,7 @@ function BuilderShell() {
   const loaded = ready && fontsReady;
 
   return (
-    <div className="grid h-screen grid-rows-[auto_auto_minmax(0,1fr)_auto] bg-background">
+    <div className="grid h-screen grid-cols-[minmax(0,1fr)] grid-rows-[auto_auto_minmax(0,1fr)_auto] bg-background">
       <TopBar />
       <Banners />
       {mode === 'edit' ? <ContextualToolbar /> : <PreviewBar onReset={preview.reset} />}

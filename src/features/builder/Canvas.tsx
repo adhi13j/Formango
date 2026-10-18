@@ -302,8 +302,8 @@ export function Canvas() {
       ref={workspaceRef}
       data-testid="workspace"
       tabIndex={-1}
-      className="relative h-full w-full overflow-auto bg-workspace outline-none"
-      style={{ cursor }}
+      className="relative h-full w-full overflow-auto outline-none"
+      style={{ cursor, background: page.outerBackground }}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerLeave={() => setHoverId(null)}
